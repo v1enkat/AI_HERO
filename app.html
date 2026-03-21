@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI HER-OS — Your Life Operating System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;700&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<!-- ============ SIDEBAR ============ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <span class="logo-icon">✦</span>
+      <span class="logo-text">HER<span class="gold">-OS</span></span>
+    </div>
+    <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="#" class="nav-item active" data-page="dashboard">
+      <span class="nav-icon">◈</span>
+      <span class="nav-label">Dashboard</span>
+    </a>
+    <a href="#" class="nav-item" data-page="productivity">
+      <span class="nav-icon">⚡</span>
+      <span class="nav-label">Productivity</span>
+    </a>
+    <a href="#" class="nav-item" data-page="scheduler">
+      <span class="nav-icon">📅</span>
+      <span class="nav-label">Smart Scheduler</span>
+    </a>
+    <a href="#" class="nav-item" data-page="learning">
+      <span class="nav-icon">🎓</span>
+      <span class="nav-label">Learning</span>
+    </a>
+    <a href="#" class="nav-item" data-page="home">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Home Life</span>
+    </a>
+    <a href="#" class="nav-item" data-page="finance">
+      <span class="nav-icon">💰</span>
+      <span class="nav-label">Finance</span>
+    </a>
+    <a href="#" class="nav-item" data-page="leadership">
+      <span class="nav-icon">👑</span>
+      <span class="nav-label">Leadership</span>
+    </a>
+    <a href="#" class="nav-item" data-page="branding">
+      <span class="nav-icon">✨</span>
+      <span class="nav-label">Branding</span>
+    </a>
+    <a href="#" class="nav-item" data-page="wellness">
+      <span class="nav-icon">💜</span>
+      <span class="nav-label">Wellness</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a href="#" class="nav-item" data-page="aichat">
+      <span class="nav-icon">🧠</span>
+      <span class="nav-label">AI Chat</span>
+    </a>
+    <a href="#" class="nav-item" data-page="settings">
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-label">Settings</span>
+    </a>
+    <div style="border-top:1px solid rgba(255,255,255,0.08);margin-top:8px;padding-top:8px;">
+      <a href="index.html" class="nav-item">
+        <span class="nav-icon">🏡</span>
+        <span class="nav-label">Home Page</span>
+      </a>
+      <a href="architecture.html" class="nav-item">
+        <span class="nav-icon">🔧</span>
+        <span class="nav-label">Architecture</span>
+      </a>
+    </div>
+  </div>
+</aside>
+
+<!-- ============ MAIN ============ -->
+<main class="main" id="main">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="mobile-menu" id="mobileMenu">☰</button>
+      <div class="topbar-greeting" id="greeting">Good morning</div>
+    </div>
+    <div class="topbar-right">
+      <div class="cycle-indicator" id="cycleIndicator" title="Cycle phase">
+        <span class="cycle-dot"></span>
+        <span class="cycle-text">Follicular</span>
+      </div>
+      <div class="energy-badge" id="energyBadge" title="Current energy level">
+        <span class="energy-icon">⚡</span>
+        <span class="energy-text">High</span>
+      </div>
+      <button class="notif-btn" id="notifBtn" title="Notifications">
+        🔔 <span class="notif-count" id="notifCount">3</span>
+      </button>
+      <div class="avatar" id="avatarBtn">
+        <span>👩</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ PAGE: DASHBOARD ============ -->
+  <section class="page active" id="page-dashboard">
+    <div class="page-header">
+      <h1 class="page-title">Welcome back, <span id="userName">there</span> ✦</h1>
+      <p class="page-sub" id="dashboardSub">Here's your day at a glance</p>
+    </div>
+
+    <!-- AI Insight Banner -->
+    <div class="ai-banner" id="aiBanner">
+      <div class="ai-banner-icon">🧠</div>
+      <div class="ai-banner-content">
+        <div class="ai-banner-title">AI Insight</div>
+        <div class="ai-banner-text" id="aiBannerText">Your energy peaks around 10am today. Schedule your hardest task then.</div>
+      </div>
+      <button class="ai-banner-dismiss" onclick="this.parentElement.style.display='none'">×</button>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="dash-stats">
+      <div class="dash-stat-card">
+        <div class="dsc-icon" style="background:rgba(126,206,193,0.15);color:#2a8a7a">✓</div>
+        <div class="dsc-info">
+          <div class="dsc-value" id="dashTasksDone">0</div>
+          <div class="dsc-label">Tasks Done</div>
+        </div>
+      </div>
+      <div class="dash-stat-card">
+        <div class="dsc-icon" style="background:rgba(232,82,111,0.12);color:#E8526F">◷</div>
+        <div class="dsc-info">
+          <div class="dsc-value" id="dashTasksPending">0</div>
+          <div class="dsc-label">Pending</div>
+        </div>
+      </div>
+      <div class="dash-stat-card">
+        <div class="dsc-icon" style="background:rgba(212,168,83,0.15);color:#D4A853">💰</div>
+        <div class="dsc-info">
+          <div class="dsc-value" id="dashBudgetLeft">₹0</div>
+          <div class="dsc-label">Budget Left</div>
+        </div>
+      </div>
+      <div class="dash-stat-card">
+        <div class="dsc-icon" style="background:rgba(197,163,207,0.15);color:#8B5A9A">♡</div>
+        <div class="dsc-info">
+          <div class="dsc-value" id="dashWellness">--</div>
+          <div class="dsc-label">Wellness</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dash-grid">
+      <!-- Today's Schedule -->
+      <div class="dash-card large">
+        <div class="dc-header">
+          <h3>Today's Schedule</h3>
+          <button class="dc-action" onclick="Router.go('scheduler')">View All →</button>
+        </div>
+        <div class="dc-body" id="dashSchedule">
+          <div class="empty-state">No tasks scheduled. Add some!</div>
+        </div>
+      </div>
+
+      <!-- AI Suggestions -->
+      <div class="dash-card">
+        <div class="dc-header">
+          <h3>AI Suggestions</h3>
+          <span class="dc-badge">Smart</span>
+        </div>
+        <div class="dc-body" id="dashSuggestions">
+          <div class="suggestion-item">
+            <span class="si-icon">💡</span>
+            <span class="si-text">Your energy is high — tackle that presentation now</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Add -->
+      <div class="dash-card">
+        <div class="dc-header">
+          <h3>Quick Add</h3>
+        </div>
+        <div class="dc-body quick-add-grid">
+          <button class="quick-btn" onclick="Productivity.openAdd()">➕ Task</button>
+          <button class="quick-btn" onclick="Finance.openAdd()">💳 Expense</button>
+          <button class="quick-btn" onclick="Home.openAddGrocery()">🛒 Grocery</button>
+          <button class="quick-btn" onclick="Wellness.openMood()">😊 Mood</button>
+          <button class="quick-btn" onclick="Router.go('learning')">📚 Learn</button>
+          <button class="quick-btn" onclick="Router.go('aichat')">🧠 Ask AI</button>
+        </div>
+      </div>
+
+      <!-- Spending Snapshot -->
+      <div class="dash-card">
+        <div class="dc-header">
+          <h3>Spending This Week</h3>
+          <button class="dc-action" onclick="Router.go('finance')">Details →</button>
+        </div>
+        <div class="dc-body" id="dashSpending">
+          <div class="spending-bar-container" id="spendingBars"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE: PRODUCTIVITY ============ -->
+  <section class="page" id="page-productivity">
+    <div class="page-header">
+      <h1 class="page-title">⚡ Productivity Engine</h1>
+      <p class="page-sub">AI plans your day based on energy levels</p>
+    </div>
+
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <button class="btn btn-primary" onclick="Productivity.openAdd()">+ Add Task</button>
+        <button class="btn btn-ghost" onclick="Productivity.autoSchedule()">🧠 AI Auto-Schedule</button>
+      </div>
+      <div class="toolbar-right">
+        <select id="taskFilter" onchange="Productivity.render()">
+          <option value="all">All Tasks</option>
+          <option value="today">Today</option>
+          <option value="pending">Pending</option>
+          <option value="done">Completed</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Energy Tracker -->
+    <div class="energy-tracker">
+      <div class="et-label">How's your energy right now?</div>
+      <div class="et-levels">
+        <button class="et-btn" data-level="low" onclick="Productivity.setEnergy('low')">😴 Low</button>
+        <button class="et-btn" data-level="medium" onclick="Productivity.setEnergy('medium')">😊 Medium</button>
+        <button class="et-btn active" data-level="high" onclick="Productivity.setEnergy('high')">🔥 High</button>
+      </div>
+      <div class="et-suggestion" id="energySuggestion">High energy detected — perfect for deep work!</div>
+    </div>
+
+    <!-- Focus Timer -->
+    <div class="focus-timer-bar" id="focusTimerBar" style="display:none">
+      <div class="ft-info">
+        <span class="ft-label">Focus Block Active</span>
+        <span class="ft-time" id="focusTime">25:00</span>
+      </div>
+      <div class="ft-progress"><div class="ft-fill" id="focusFill"></div></div>
+      <button class="btn btn-sm" onclick="Productivity.stopFocus()">Stop</button>
+    </div>
+
+    <!-- Task List -->
+    <div class="task-list" id="taskList">
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <div class="empty-text">No tasks yet. Add your first task!</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE: SCHEDULER ============ -->
+  <section class="page" id="page-scheduler">
+    <div class="page-header">
+      <h1 class="page-title">📅 Smart Scheduler</h1>
+      <p class="page-sub">Work-aware planning that auto-balances your life</p>
+    </div>
+
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <button class="btn btn-primary" onclick="Scheduler.openAdd()">+ Add Event</button>
+        <button class="btn btn-ghost" onclick="Scheduler.aiPlan()">🧠 AI Auto-Plan</button>
+      </div>
+      <div class="toolbar-right">
+        <button class="btn btn-sm" onclick="Scheduler.prevDay()">←</button>
+        <span class="scheduler-date" id="schedulerDate">Today</span>
+        <button class="btn btn-sm" onclick="Scheduler.nextDay()">→</button>
+      </div>
+    </div>
+
+    <div class="workload-indicator" id="workloadBar">
+      <div class="wi-label">Workload: <strong id="workloadLevel">Moderate</strong></div>
+      <div class="wi-bar"><div class="wi-fill" id="workloadFill" style="width:50%"></div></div>
+      <div class="wi-note" id="workloadNote">Balanced day — personal tasks can stay</div>
+    </div>
+
+    <div class="schedule-timeline" id="scheduleTimeline">
+      <div class="empty-state">
+        <div class="empty-icon">📅</div>
+        <div class="empty-text">No events scheduled. Let AI plan your day!</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE: LEARNING ============ -->
+  <section class="page" id="page-learning">
+    <div class="page-header">
+      <h1 class="page-title">🎓 AI Learning Hub</h1>
+      <p class="page-sub">Personalized instructor adapted to your learning style</p>
+    </div>
+
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <select id="learningStyle" onchange="Learning.setStyle(this.value)">
+          <option value="visual">🎨 Visual Learner</option>
+          <option value="reading">📖 Reading/Writing</option>
+          <option value="practical">🔧 Hands-On / Practical</option>
+          <option value="auditory">🎧 Auditory</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Learning Progress -->
+    <div class="learning-progress">
+      <div class="lp-stat">
+        <div class="lp-value" id="lpStreak">0</div>
+        <div class="lp-label">Day Streak</div>
+      </div>
+      <div class="lp-stat">
+        <div class="lp-value" id="lpMinutes">0</div>
+        <div class="lp-label">Min Learned</div>
+      </div>
+      <div class="lp-stat">
+        <div class="lp-value" id="lpSkills">0</div>
+        <div class="lp-label">Skills</div>
+      </div>
+    </div>
+
+    <!-- Skill Cards -->
+    <div class="skill-path" id="skillPath">
+      <div class="empty-state">
+        <div class="empty-icon">🎯</div>
+        <div class="empty-text">Tell AI what you want to learn!</div>
+        <button class="btn btn-primary" onclick="Learning.openAdd()">+ Add Skill to Learn</button>
+      </div>
+    </div>
+
+    <!-- AI Instructor Chat -->
+    <div class="instructor-chat" id="instructorChat">
+      <div class="ic-header">
+        <div class="ic-avatar">🧠</div>
+        <div class="ic-info">
+          <div class="ic-name">HER-OS Instructor</div>
+          <div class="ic-status">● Adapted to your style</div>
+        </div>
+      </div>
+      <div class="ic-messages" id="instructorMessages">
+        <div class="ic-msg ai">
+          <span class="ic-label">AI Instructor</span>
+          Hi! I'm your personal AI instructor. Tell me what skill you want to learn, and I'll create a personalized learning path just for you. I adapt to how your brain learns best!
+        </div>
+      </div>
+      <div class="ic-input-area">
+        <input type="text" id="instructorInput" placeholder="Ask me to teach you anything..." onkeydown="if(event.key==='Enter')Learning.sendMsg()">
+        <button class="btn btn-primary" onclick="Learning.sendMsg()">Send</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE: HOME ============ -->
+  <section class="page" id="page-home">
+    <div class="page-header">
+      <h1 class="page-title">🏠 Home & Life Manager</h1>
+      <p class="page-sub">Smart grocery lists, meal plans, and geo-reminders</p>
+    </div>
+
+    <div class="home-tabs">
+      <button class="htab active" onclick="Home.switchTab('grocery',this)">🛒 Groceries</button>
+      <button class="htab" onclick="Home.switchTab('meals',this)">🍽️ Meal Plan</button>
+      <button class="htab" onclick="Home.switchTab('family',this)">👨‍👩‍👧 Family</button>
+      <button class="htab" onclick="Home.switchTab('geo',this)">📍 Geo-Reminders</button>
+    </div>
+
+    <!-- Grocery Tab -->
+    <div class="home-panel active" id="panel-grocery">
+      <div class="toolbar">
+        <button class="btn btn-primary" onclick="Home.openAddGrocery()">+ Add Item</button>
+        <button class="btn btn-ghost" onclick="Home.aiMealSuggest()">🧠 AI Suggest Groceries</button>
+      </div>
+      <div class="grocery-list" id="groceryList">
+        <div class="empty-state">
+          <div class="empty-icon">🛒</div>
+          <div class="empty-text">Your grocery list is empty</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Meal Plan Tab -->
+    <div class="home-panel" id="panel-meals">
+      <div class="toolbar">
+        <button class="btn btn-primary" onclick="Home.generateMealPlan()">🧠 AI Generate Meal Plan</button>
+      </div>
+      <div class="meal-plan" id="mealPlan">
+        <div class="empty-state">
+          <div class="empty-icon">🍽️</div>
+          <div class="empty-text">No meal plan yet. Let AI create one!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Family Tab -->
+    <div class="home-panel" id="panel-family">
+      <div class="toolbar">
+        <button class="btn btn-primary" onclick="Home.openAddFamily()">+ Add Family Event</button>
+      </div>
+      <div class="family-schedule" id="familySchedule">
+        <div class="empty-state">
+          <div class="empty-icon">👨‍👩‍👧</div>
+          <div class="empty-text">No family events. Add birthdays, school events, etc.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Geo-Reminders Tab -->
+    <div class="home-panel" id="panel-geo">
+      <div class="toolbar">
+        <button class="btn btn-primary" onclick="Home.openAddGeo()">+ Add Geo-Reminder</button>
+      </div>
+      <div class="geo-reminders" id="geoReminders">
+        <div class="geo-info-card">
+          <div class="gi-icon">📍</div>
+          <div class="gi-content">
+            <strong>Smart Geo-Reminders</strong>
+            <p>Add stores and items. When you're near a matching store, HER-OS reminds you automatically.</p>
+          </div>
+        </div>
+        <div class="geo-rules">
+          <div class="geo-rule"><span class="gr-tag always">ALWAYS</span> User-selected stores always trigger</div>
+          <div class="geo-rule"><span class="gr-tag category">CATEGORY</span> Other stores only if category matches</div>
+          <div class="geo-rule"><span class="gr-tag proximity">PROXIMITY</span> Within short radius only</div>
+          <div class="geo-rule"><span class="gr-tag antispam">ANTI-SPAM</span> Won't repeat dismissed reminders</div>
+        </div>
+        <div id="geoList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE: FINANCE ============ -->
+  <section class="page" id="page-finance">
+    <div class="page-header">
+      <h1 class="page-title">💰 Money Mentor</h1>
+      <p class="page-sub">AI-powered budgeting & financial awareness</p>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn btn-primary" onclick="Finance.openAdd()">+ Log Expense</button>
+      <button class="btn btn-ghost" onclick="Finance.openIncome()">💵 Set Income</button>
+      <button class="btn btn-ghost" onclick="Finance.aiAdvice()">🧠 AI Money Advice</button>
+    </div>
+
+    <!-- Finance Stats -->
+    <div class="finance-stats">
+      <div class="fs-card income">
+        <div class="fs-label">Monthly Income</div>
+        <div class="fs-value" id="finIncome">₹0</div>
+      </div>
+      <div class="fs-card spent">
+        <div class="fs-label">Spent This Month</div>
+        <div class="fs-value" id="finSpent">₹0</div>
+      </div>
+      <div class="fs-card remaining">
+        <div class="fs-label">Remaining</div>
+        <div class="fs-value" id="finRemaining">₹0</div>
+      </div>
+      <div class="fs-card savings">
+        <div class="fs-label">Savings Goal</div>
+        <div class="fs-value" id="finSavings">₹0</div>
+      </div>
+    </div>
+
+    <!-- Budget Bar -->
+    <div class="budget-visual" id="budgetVisual">
+      <div class="bv-header">
+        <span>Budget Usage</span>
+        <span id="budgetPercent">0%</span>
+      </div>
+      <div class="bv-bar"><div class="bv-fill" id="budgetFill"></div></div>
+    </div>
+
+    <!-- Expense List -->
+    <div class="expense-categories" id="expenseCategories"></div>
+    <div class="expense-list" id="expenseList">
+      <div class="empty-state">
+        <div class="empty-icon">💳</div>
+        <div class="empty-text">No expenses logged. Start tracking your spending!</div>
+      </div>
+    </div>
+
+    <!-- AI Finance Tips -->
+    <div class="ai-tips-card" id="financeTips" style="display:none">
+      <div class="ait-header">🧠 AI Money Insights</div>
+      <div class="ait-body" id="finTipsBody"></div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE: LEADERSHIP ============ -->
+  <section class="page" id="page-leadership">
+    <div class="page-header">
+      <h1 class="page-title">👑 Leadership Suite</h1>
+      <p class="page-sub">Build confidence, rewrite emails, and lead stronger</p>
+    </div>
+
+    <div class="leadership-grid">
+      <!-- Email Rewriter -->
+      <div class="lead-card">
+        <h3>✍️ Smart Email Rewriter</h3>
+        <p class="lead-desc">Paste your email draft and AI will make it sound more confident and assertive.</p>
+        <textarea id="emailInput" class="lead-textarea" rows="5" placeholder="Paste your email draft here..."></textarea>
+        <div class="lead-actions">
+          <select id="emailTone">
+            <option value="confident">Confident</option>
+            <option value="assertive">Assertive</option>
+            <option value="diplomatic">Diplomatic</option>
+            <option value="friendly">Friendly but firm</option>
+          </select>
+          <button class="btn btn-primary" onclick="Leadership.rewriteEmail()">🧠 Rewrite</button>
+        </div>
+        <div class="lead-output" id="emailOutput" style="display:none">
+          <div class="lo-label">AI Rewrite:</div>
+          <div class="lo-text" id="emailResult"></div>
+          <button class="btn btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('emailResult').textContent)">📋 Copy</button>
+        </div>
+      </div>
+
+      <!-- Elevator Pitch -->
+      <div class="lead-card">
+        <h3>🎤 Elevator Pitch Generator</h3>
+        <p class="lead-desc">AI creates a compelling pitch for your role or business.</p>
+        <input type="text" id="pitchRole" class="lead-input" placeholder="Your role (e.g., Marketing Manager)">
+        <input type="text" id="pitchAchievement" class="lead-input" placeholder="Key achievement or goal">
+        <button class="btn btn-primary" onclick="Leadership.generatePitch()">🧠 Generate Pitch</button>
+        <div class="lead-output" id="pitchOutput" style="display:none">
+          <div class="lo-label">Your Elevator Pitch:</div>
+          <div class="lo-text" id="pitchResult"></div>
+        </div>
+      </div>
+
+      <!-- Leadership Tips -->
+      <div class="lead-card">
+        <h3>📚 Daily Leadership Micro-Lesson</h3>
+        <div class="micro-lesson" id="microLesson">
+          <div class="ml-topic">Building Executive Presence</div>
+          <div class="ml-content">Start meetings by stating your position first, then supporting data. This positions you as a decision-maker, not just a reporter.</div>
+          <div class="ml-action">✅ Practice: In your next meeting, lead with your recommendation.</div>
+        </div>
+        <button class="btn btn-ghost" onclick="Leadership.nextLesson()">Next Lesson →</button>
+      </div>
+
+      <!-- Salary Negotiation -->
+      <div class="lead-card">
+        <h3>💪 Salary Negotiation Coach</h3>
+        <p class="lead-desc">Get AI-generated scripts for your next negotiation.</p>
+        <input type="text" id="negCurrentSalary" class="lead-input" placeholder="Current salary (e.g., ₹50,000)">
+        <input type="text" id="negDesiredSalary" class="lead-input" placeholder="Desired salary">
+        <input type="text" id="negReason" class="lead-input" placeholder="Key reason (e.g., 2 years of strong results)">
+        <button class="btn btn-primary" onclick="Leadership.negotiationScript()">🧠 Generate Script</button>
+        <div class="lead-output" id="negOutput" style="display:none">
+          <div class="lo-label">Negotiation Script:</div>
+          <div class="lo-text" id="negResult"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE: BRANDING ============ -->
+  <section class="page" id="page-branding">
+    <div class="page-header">
+      <h1 class="page-title">✨ Personal Branding</h1>
+      <p class="page-sub">Build your digital identity and track your success</p>
+    </div>
+
+    <div class="branding-grid">
+      <!-- LinkedIn Optimizer -->
+      <div class="lead-card">
+        <h3>💼 LinkedIn Headline Optimizer</h3>
+        <input type="text" id="linkedinRole" class="lead-input" placeholder="Your current role">
+        <input type="text" id="linkedinSkills" class="lead-input" placeholder="Top 3 skills (comma separated)">
+        <button class="btn btn-primary" onclick="Branding.optimizeLinkedIn()">🧠 Optimize</button>
+        <div class="lead-output" id="linkedinOutput" style="display:none">
+          <div class="lo-label">Optimized Headlines:</div>
+          <div class="lo-text" id="linkedinResult"></div>
+        </div>
+      </div>
+
+      <!-- Social Post Generator -->
+      <div class="lead-card">
+        <h3>📱 Social Media Post Generator</h3>
+        <input type="text" id="postTopic" class="lead-input" placeholder="Topic or achievement to post about">
+        <select id="postPlatform">
+          <option value="linkedin">LinkedIn</option>
+          <option value="twitter">Twitter/X</option>
+          <option value="instagram">Instagram</option>
+        </select>
+        <button class="btn btn-primary" onclick="Branding.generatePost()">🧠 Generate Post</button>
+        <div class="lead-output" id="postOutput" style="display:none">
+          <div class="lo-text" id="postResult"></div>
+        </div>
+      </div>
+
+      <!-- Success Timeline -->
+      <div class="lead-card wide">
+        <h3>🏆 Success Timeline</h3>
+        <p class="lead-desc">Track your wins and milestones.</p>
+        <div class="toolbar">
+          <button class="btn btn-primary" onclick="Branding.openAddWin()">+ Add Win</button>
+        </div>
+        <div class="success-timeline" id="successTimeline">
+          <div class="empty-state"><div class="empty-text">Start logging your achievements!</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE: WELLNESS ============ -->
+  <section class="page" id="page-wellness">
+    <div class="page-header">
+      <h1 class="page-title">💜 Wellness Guardian</h1>
+      <p class="page-sub">Cycle-aware self-care, mood tracking, and stress management</p>
+    </div>
+
+    <div class="wellness-top">
+      <!-- Mood Tracker -->
+      <div class="well-card">
+        <h3>How are you feeling?</h3>
+        <div class="mood-selector">
+          <button class="mood-btn" data-mood="great" onclick="Wellness.logMood('great',this)">😄<span>Great</span></button>
+          <button class="mood-btn" data-mood="good" onclick="Wellness.logMood('good',this)">😊<span>Good</span></button>
+          <button class="mood-btn" data-mood="okay" onclick="Wellness.logMood('okay',this)">😐<span>Okay</span></button>
+          <button class="mood-btn" data-mood="low" onclick="Wellness.logMood('low',this)">😔<span>Low</span></button>
+          <button class="mood-btn" data-mood="stressed" onclick="Wellness.logMood('stressed',this)">😰<span>Stressed</span></button>
+        </div>
+      </div>
+
+      <!-- Wellness Score -->
+      <div class="well-card">
+        <h3>Wellness Score</h3>
+        <div class="wellness-score-ring">
+          <svg viewBox="0 0 120 120" class="score-svg">
+            <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(197,163,207,0.2)" stroke-width="8"/>
+            <circle cx="60" cy="60" r="54" fill="none" stroke="url(#wellGrad)" stroke-width="8" stroke-linecap="round" stroke-dasharray="339.3" stroke-dashoffset="169.6" id="wellScoreCircle" transform="rotate(-90 60 60)"/>
+            <defs><linearGradient id="wellGrad"><stop offset="0%" stop-color="#7ECEC1"/><stop offset="100%" stop-color="#C5A3CF"/></linearGradient></defs>
+          </svg>
+          <div class="score-value" id="wellScoreValue">50</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cycle Tracker -->
+    <div class="well-card wide">
+      <h3>🌙 Cycle Tracker</h3>
+      <p class="lead-desc">Track your cycle and get phase-specific recommendations.</p>
+      <div class="cycle-tracker-grid">
+        <div class="ct-input-group">
+          <label>Last period start date:</label>
+          <input type="date" id="cycleStartDate" onchange="Wellness.updateCycle()">
+          <label>Average cycle length (days):</label>
+          <input type="number" id="cycleLength" value="28" min="21" max="40" onchange="Wellness.updateCycle()">
+        </div>
+        <div class="ct-phase-display" id="cyclePhaseDisplay">
+          <div class="ct-phase-name" id="ctPhaseName">Set your cycle dates</div>
+          <div class="ct-phase-day" id="ctPhaseDay"></div>
+          <div class="ct-recommendations" id="ctRecommendations"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mood History -->
+    <div class="well-card wide">
+      <h3>Mood History</h3>
+      <div class="mood-history" id="moodHistory">
+        <div class="empty-state"><div class="empty-text">Log your mood daily to see patterns</div></div>
+      </div>
+    </div>
+
+    <!-- Break Reminder -->
+    <div class="well-card">
+      <h3>⏰ Smart Break Reminder</h3>
+      <p class="lead-desc">Get reminded to take breaks based on your work patterns.</p>
+      <div class="break-toggle">
+        <label class="toggle">
+          <input type="checkbox" id="breakToggle" onchange="Wellness.toggleBreaks()">
+          <span class="toggle-slider"></span>
+        </label>
+        <span>Break reminders every 45 minutes</span>
+      </div>
+      <div class="break-rituals" id="breakRituals">
+        <div class="ritual">🧘 5 deep breaths</div>
+        <div class="ritual">💧 Drink water</div>
+        <div class="ritual">👀 Look at something 20ft away for 20 seconds</div>
+        <div class="ritual">🚶 Quick stretch or walk</div>
+      </div>
+    </div>
+
+    <!-- Sleep Tracker -->
+    <div class="well-card">
+      <h3>😴 Sleep Log</h3>
+      <div class="sleep-input">
+        <label>Hours slept last night:</label>
+        <input type="number" id="sleepHours" min="0" max="14" step="0.5" placeholder="7.5">
+        <label>Sleep quality:</label>
+        <select id="sleepQuality">
+          <option value="great">Great - woke up refreshed</option>
+          <option value="good">Good - slept well</option>
+          <option value="okay">Okay - could be better</option>
+          <option value="poor">Poor - tossed and turned</option>
+        </select>
+        <button class="btn btn-primary" onclick="Wellness.logSleep()">Log Sleep</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE: AI CHAT ============ -->
+  <section class="page" id="page-aichat">
+    <div class="page-header">
+      <h1 class="page-title">🧠 AI HER-OS Assistant</h1>
+      <p class="page-sub">Your personal AI that understands your whole life</p>
+    </div>
+
+    <div class="chat-container">
+      <div class="chat-messages" id="chatMessages">
+        <div class="chat-msg ai">
+          <div class="cm-avatar">🧠</div>
+          <div class="cm-bubble">
+            <div class="cm-text">Hi! I'm your HER-OS AI assistant. I can help you with productivity, scheduling, finances, wellness, learning, home management, leadership, and personal branding. What would you like help with?</div>
+          </div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <input type="text" id="chatInput" placeholder="Ask me anything about your day, tasks, finances, wellness..." onkeydown="if(event.key==='Enter')AIChat.send()">
+        <button class="btn btn-primary" onclick="AIChat.send()">Send</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE: SETTINGS ============ -->
+  <section class="page" id="page-settings">
+    <div class="page-header">
+      <h1 class="page-title">⚙️ Settings</h1>
+      <p class="page-sub">Personalize your HER-OS experience</p>
+    </div>
+
+    <div class="settings-grid">
+      <div class="settings-card">
+        <h3>👤 Profile</h3>
+        <label>Your Name</label>
+        <input type="text" id="settingName" class="lead-input" placeholder="Enter your name" onchange="Settings.save()">
+        <label>Preferred Language</label>
+        <select id="settingLang" class="lead-input" onchange="Settings.save()">
+          <option value="en">English</option>
+          <option value="hi">Hindi</option>
+        </select>
+      </div>
+
+      <div class="settings-card">
+        <h3>🎨 Appearance</h3>
+        <label>Theme</label>
+        <select id="settingTheme" class="lead-input" onchange="Settings.toggleTheme()">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
+
+      <div class="settings-card">
+        <h3>🧠 AI Configuration</h3>
+        <label>AI API Key (Optional — for enhanced AI)</label>
+        <input type="password" id="settingApiKey" class="lead-input" placeholder="sk-... (OpenAI or Groq key)" onchange="Settings.save()">
+        <p class="settings-note">Without an API key, HER-OS uses its built-in smart AI engine. Add a key for richer conversations.</p>
+        <label>API Provider</label>
+        <select id="settingApiProvider" class="lead-input" onchange="Settings.save()">
+          <option value="builtin">Built-in AI (No key needed)</option>
+          <option value="groq">Groq (Free tier available)</option>
+          <option value="openai">OpenAI</option>
+        </select>
+      </div>
+
+      <div class="settings-card">
+        <h3>📦 Data</h3>
+        <button class="btn btn-ghost" onclick="Settings.exportData()">📥 Export All Data</button>
+        <button class="btn btn-ghost" onclick="Settings.clearData()" style="color:var(--rose)">🗑️ Clear All Data</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ MODALS ============ -->
+<div class="modal-overlay" id="modalOverlay" onclick="Modal.close()"></div>
+<div class="modal" id="modal">
+  <div class="modal-header">
+    <h3 id="modalTitle">Add Item</h3>
+    <button class="modal-close" onclick="Modal.close()">×</button>
+  </div>
+  <div class="modal-body" id="modalBody"></div>
+</div>
+
+<!-- Toast -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Break Reminder Popup -->
+<div class="break-popup" id="breakPopup" style="display:none">
+  <div class="bp-content">
+    <div class="bp-icon">🧘</div>
+    <h3>Time for a Break!</h3>
+    <p id="breakTip">Take 5 deep breaths. You've been working for 45 minutes.</p>
+    <button class="btn btn-primary" onclick="Wellness.dismissBreak()">Got it!</button>
+  </div>
+</div>
+
+<!-- Geo Reminder Popup -->
+<div class="geo-popup" id="geoPopup" style="display:none">
+  <div class="gp-content">
+    <div class="gp-icon">📍</div>
+    <h3 id="geoPopupTitle">You're near a store!</h3>
+    <p id="geoPopupBody">Items to buy from your list...</p>
+    <div class="gp-actions">
+      <button class="btn btn-primary" onclick="Home.dismissGeo()">Got it!</button>
+      <button class="btn btn-ghost" onclick="Home.snoozeGeo()">Remind later</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

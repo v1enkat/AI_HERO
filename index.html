@@ -1,0 +1,2298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI HER-OS — The Life Operating System for Women</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --plum: #6B2D5B;
+  --plum-deep: #4A1942;
+  --rose: #E8526F;
+  --rose-soft: #F2A3B3;
+  --gold: #D4A853;
+  --gold-light: #F5DCA0;
+  --cream: #FFF8F0;
+  --lavender: #C5A3CF;
+  --mint: #7ECEC1;
+  --coral: #F08A6D;
+  --sky: #7EB5D6;
+  --peach: #F5C7A9;
+  --night: #1A0E2E;
+  --white: #FFFFFF;
+  --text: #2D1B33;
+  --text-light: #8B7A91;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  background: var(--cream);
+  overflow-x: hidden;
+}
+
+/* ========== HERO SECTION ========== */
+.hero {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--plum-deep) 0%, var(--plum) 40%, #8B3A7F 70%, var(--rose) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 2rem;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(ellipse at 30% 50%, rgba(212,168,83,0.15) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 20%, rgba(232,82,111,0.2) 0%, transparent 40%),
+              radial-gradient(ellipse at 50% 80%, rgba(126,206,193,0.1) 0%, transparent 50%);
+  animation: heroShimmer 15s ease-in-out infinite;
+}
+
+@keyframes heroShimmer {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(2%, -1%) rotate(1deg); }
+  66% { transform: translate(-1%, 2%) rotate(-1deg); }
+}
+
+.hero-particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+  animation: particleFloat linear infinite;
+}
+
+@keyframes particleFloat {
+  0% { opacity: 0; transform: translateY(100vh) scale(0); }
+  10% { opacity: 0.8; }
+  90% { opacity: 0.3; }
+  100% { opacity: 0; transform: translateY(-10vh) scale(1); }
+}
+
+.hero-badge {
+  position: relative;
+  z-index: 2;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 100px;
+  padding: 0.5rem 1.5rem;
+  font-size: 0.85rem;
+  color: var(--gold-light);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-weight: 500;
+  margin-bottom: 2rem;
+  animation: fadeSlideDown 1s ease-out 0.3s both;
+}
+
+.hero-title {
+  position: relative;
+  z-index: 2;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(3rem, 8vw, 7rem);
+  font-weight: 900;
+  color: var(--white);
+  text-align: center;
+  line-height: 1.05;
+  margin-bottom: 0.5rem;
+  animation: fadeSlideDown 1s ease-out 0.5s both;
+}
+
+.hero-title .accent {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+}
+
+.hero-subtitle {
+  position: relative;
+  z-index: 2;
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(1rem, 2.5vw, 1.6rem);
+  color: rgba(255,255,255,0.85);
+  text-align: center;
+  max-width: 700px;
+  line-height: 1.6;
+  margin-bottom: 3rem;
+  font-weight: 400;
+  animation: fadeSlideDown 1s ease-out 0.7s both;
+}
+
+.hero-cta {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  animation: fadeSlideDown 1s ease-out 0.9s both;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  color: var(--plum-deep);
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 1rem 2.5rem;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 4px 30px rgba(212,168,83,0.4);
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 40px rgba(212,168,83,0.6);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--white);
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 1rem 2.5rem;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 100px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.4s ease;
+  backdrop-filter: blur(10px);
+}
+
+.btn-ghost:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.6);
+  transform: translateY(-2px);
+}
+
+.hero-scroll-indicator {
+  position: absolute;
+  bottom: 2rem;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  animation: fadeSlideDown 1s ease-out 1.2s both;
+}
+
+.hero-scroll-indicator span {
+  color: rgba(255,255,255,0.5);
+  font-size: 0.75rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.scroll-line {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.5), transparent);
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.3; transform: scaleY(0.5); }
+  50% { opacity: 1; transform: scaleY(1); }
+}
+
+@keyframes fadeSlideDown {
+  from { opacity: 0; transform: translateY(-30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========== MANIFESTO ========== */
+.manifesto {
+  padding: 8rem 2rem;
+  text-align: center;
+  background: var(--cream);
+  position: relative;
+}
+
+.manifesto-inner {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.manifesto-quote {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+  font-weight: 400;
+  font-style: italic;
+  color: var(--plum);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 1s ease;
+}
+
+.manifesto-quote.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.manifesto-line {
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold), var(--rose));
+  margin: 0 auto 2rem;
+  border-radius: 2px;
+}
+
+.manifesto-text {
+  font-size: 1.1rem;
+  color: var(--text-light);
+  line-height: 1.8;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 1s ease 0.3s;
+}
+
+.manifesto-text.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ========== THEMES SECTION ========== */
+.themes-header {
+  text-align: center;
+  padding: 6rem 2rem 3rem;
+  background: var(--cream);
+}
+
+.section-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--rose);
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 900;
+  color: var(--plum-deep);
+  line-height: 1.2;
+}
+
+.themes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 0;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.theme-card {
+  position: relative;
+  padding: 3rem 2.5rem;
+  border: 1px solid rgba(107,45,91,0.08);
+  overflow: hidden;
+  cursor: default;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  opacity: 0;
+  transform: translateY(60px);
+}
+
+.theme-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.theme-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.theme-card:hover::before {
+  opacity: 1;
+}
+
+.theme-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 60px rgba(107,45,91,0.15);
+  z-index: 2;
+  border-radius: 20px;
+}
+
+.theme-card:nth-child(1)::before { background: linear-gradient(135deg, rgba(232,82,111,0.05), rgba(212,168,83,0.08)); }
+.theme-card:nth-child(2)::before { background: linear-gradient(135deg, rgba(126,206,193,0.08), rgba(126,181,214,0.05)); }
+.theme-card:nth-child(3)::before { background: linear-gradient(135deg, rgba(212,168,83,0.08), rgba(240,138,109,0.05)); }
+.theme-card:nth-child(4)::before { background: linear-gradient(135deg, rgba(197,163,207,0.08), rgba(232,82,111,0.05)); }
+.theme-card:nth-child(5)::before { background: linear-gradient(135deg, rgba(126,206,193,0.05), rgba(212,168,83,0.08)); }
+.theme-card:nth-child(6)::before { background: linear-gradient(135deg, rgba(126,181,214,0.08), rgba(197,163,207,0.05)); }
+.theme-card:nth-child(7)::before { background: linear-gradient(135deg, rgba(240,138,109,0.05), rgba(232,82,111,0.08)); }
+.theme-card:nth-child(8)::before { background: linear-gradient(135deg, rgba(197,163,207,0.05), rgba(126,206,193,0.08)); }
+
+.theme-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 4rem;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+  opacity: 0.1;
+  position: relative;
+}
+
+.theme-card:nth-child(1) .theme-number { color: var(--rose); }
+.theme-card:nth-child(2) .theme-number { color: var(--mint); }
+.theme-card:nth-child(3) .theme-number { color: var(--gold); }
+.theme-card:nth-child(4) .theme-number { color: var(--lavender); }
+.theme-card:nth-child(5) .theme-number { color: var(--mint); }
+.theme-card:nth-child(6) .theme-number { color: var(--sky); }
+.theme-card:nth-child(7) .theme-number { color: var(--coral); }
+.theme-card:nth-child(8) .theme-number { color: var(--lavender); }
+
+.theme-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.theme-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--plum-deep);
+  margin-bottom: 0.8rem;
+}
+
+.theme-feature-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--plum);
+  margin-bottom: 1rem;
+  font-style: italic;
+}
+
+.theme-features {
+  list-style: none;
+  padding: 0;
+}
+
+.theme-features li {
+  padding: 0.4rem 0;
+  font-size: 0.95rem;
+  color: var(--text-light);
+  line-height: 1.5;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.theme-features li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.theme-matched {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1.2rem;
+  padding: 0.4rem 1rem;
+  background: linear-gradient(135deg, rgba(126,206,193,0.15), rgba(126,206,193,0.05));
+  border-radius: 100px;
+  font-size: 0.8rem;
+  color: #2a8a7a;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.theme-matched .check {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  background: var(--mint);
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.7rem;
+}
+
+/* ========== WHY UNIQUE SECTION ========== */
+.unique-section {
+  padding: 8rem 2rem;
+  background: linear-gradient(135deg, var(--night) 0%, var(--plum-deep) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.unique-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 20% 50%, rgba(197,163,207,0.1) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 30%, rgba(212,168,83,0.08) 0%, transparent 50%);
+}
+
+.unique-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.unique-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.unique-header .section-label {
+  color: var(--gold-light);
+}
+
+.unique-header .section-title {
+  color: var(--white);
+}
+
+.gap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 4rem;
+}
+
+.gap-card {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 2rem;
+  transition: all 0.4s ease;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.gap-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.gap-card:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(212,168,83,0.3);
+  transform: translateY(-4px);
+}
+
+.gap-x {
+  font-size: 1.5rem;
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.gap-x .x {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  background: rgba(232,82,111,0.2);
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+  color: var(--rose);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.gap-text {
+  color: rgba(255,255,255,0.7);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.category-statement {
+  text-align: center;
+  padding: 3rem;
+  background: linear-gradient(135deg, rgba(212,168,83,0.1), rgba(232,82,111,0.1));
+  border: 1px solid rgba(212,168,83,0.2);
+  border-radius: 24px;
+  opacity: 0;
+  transform: scale(0.95);
+  transition: all 0.8s ease;
+}
+
+.category-statement.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.category-statement h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  color: var(--white);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.category-statement h3 .gold {
+  color: var(--gold);
+}
+
+.category-statement p {
+  color: rgba(255,255,255,0.6);
+  font-size: 1.1rem;
+}
+
+/* ========== STATS STRIP ========== */
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: var(--plum);
+  overflow: hidden;
+}
+
+.stat-item {
+  padding: 3rem 1.5rem;
+  text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.1);
+  transition: background 0.3s ease;
+}
+
+.stat-item:last-child { border-right: none; }
+
+.stat-item:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.stat-number {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ========== ARCHITECTURE SECTION ========== */
+.architecture {
+  padding: 8rem 2rem;
+  background: var(--cream);
+}
+
+.arch-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.arch-visual {
+  margin-top: 4rem;
+  position: relative;
+}
+
+.arch-core {
+  width: 200px;
+  height: 200px;
+  background: linear-gradient(135deg, var(--plum), var(--rose));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 0 80px rgba(107,45,91,0.3);
+  animation: corePulse 3s ease-in-out infinite;
+}
+
+@keyframes corePulse {
+  0%, 100% { box-shadow: 0 0 60px rgba(107,45,91,0.3); }
+  50% { box-shadow: 0 0 100px rgba(107,45,91,0.5); }
+}
+
+.arch-core-text {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  color: var(--white);
+  font-size: 1.1rem;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.arch-ring {
+  position: absolute;
+  border: 2px dashed rgba(107,45,91,0.15);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: ringRotate 60s linear infinite;
+}
+
+.arch-ring-1 { width: 350px; height: 350px; }
+.arch-ring-2 { width: 500px; height: 500px; animation-direction: reverse; animation-duration: 80s; }
+
+@keyframes ringRotate {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.arch-nodes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 3rem;
+}
+
+.arch-node {
+  background: var(--white);
+  border: 1px solid rgba(107,45,91,0.1);
+  border-radius: 16px;
+  padding: 1rem 1.5rem;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--plum);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+}
+
+.arch-node:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(107,45,91,0.15);
+  border-color: var(--gold);
+}
+
+/* ========== FOOTER ========== */
+.footer {
+  background: var(--night);
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.footer-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--white);
+  margin-bottom: 1rem;
+}
+
+.footer-logo .accent { color: var(--gold); }
+
+.footer-tagline {
+  color: rgba(255,255,255,0.4);
+  font-size: 0.9rem;
+  margin-bottom: 2rem;
+  letter-spacing: 2px;
+}
+
+.footer-line {
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold), var(--rose));
+  margin: 0 auto 2rem;
+  border-radius: 2px;
+}
+
+.footer-copy {
+  color: rgba(255,255,255,0.25);
+  font-size: 0.8rem;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+  .themes-grid {
+    grid-template-columns: 1fr;
+  }
+  .stats-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .stat-item:nth-child(2) { border-right: none; }
+  .gap-grid {
+    grid-template-columns: 1fr;
+  }
+  .hero-cta {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+/* ========== NAVBAR ========== */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.4s ease;
+}
+
+.navbar.scrolled {
+  background: rgba(74,25,66,0.95);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 4px 30px rgba(0,0,0,0.2);
+  padding: 0.7rem 2rem;
+}
+
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--white);
+  text-decoration: none;
+}
+
+.nav-logo .accent { color: var(--gold); }
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+}
+
+.nav-links a {
+  color: rgba(255,255,255,0.7);
+  text-decoration: none;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  font-family: 'Syne', sans-serif;
+}
+
+.nav-links a:hover {
+  color: var(--gold);
+}
+
+.nav-links .nav-cta {
+  background: linear-gradient(135deg, var(--gold), var(--rose));
+  color: #fff;
+  padding: 6px 18px;
+  border-radius: 20px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.nav-links .nav-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(212,168,83,0.4);
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+}
+
+/* ========== CYCLE AWARENESS SECTION ========== */
+.cycle-section {
+  padding: 6rem 2rem;
+  background: linear-gradient(180deg, var(--cream) 0%, #F5EBF7 100%);
+  position: relative;
+}
+
+.cycle-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .cycle-inner { grid-template-columns: 1fr; }
+}
+
+.cycle-visual {
+  display: flex;
+  justify-content: center;
+}
+
+.cycle-ring-container {
+  position: relative;
+  width: 320px;
+  height: 320px;
+}
+
+.cycle-ring-bg {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--rose-soft) 0deg 90deg,
+    var(--gold-light) 90deg 180deg,
+    var(--mint) 180deg 270deg,
+    var(--lavender) 270deg 360deg
+  );
+  opacity: 0.4;
+  animation: cycleRotate 20s linear infinite;
+}
+
+@keyframes cycleRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.cycle-ring-label {
+  position: absolute;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.cycle-ring-label.top { top: -25px; left: 50%; transform: translateX(-50%); color: var(--rose); }
+.cycle-ring-label.right { right: -40px; top: 50%; transform: translateY(-50%); color: var(--gold); }
+.cycle-ring-label.bottom { bottom: -25px; left: 50%; transform: translateX(-50%); color: var(--mint); }
+.cycle-ring-label.left { left: -40px; top: 50%; transform: translateY(-50%); color: var(--lavender); }
+
+.cycle-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 180px;
+  height: 180px;
+  background: var(--white);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 40px rgba(107,45,91,0.1);
+}
+
+.cycle-center-icon { font-size: 2rem; margin-bottom: 0.3rem; }
+
+.cycle-center-text {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--plum);
+}
+
+.cycle-content h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  color: var(--plum-deep);
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.cycle-content p {
+  color: var(--text-light);
+  line-height: 1.8;
+  font-size: 1.05rem;
+  margin-bottom: 1.5rem;
+}
+
+.cycle-phases {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+}
+
+.cycle-phase {
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.cycle-phase.menstrual { background: rgba(232,82,111,0.1); color: var(--rose); }
+.cycle-phase.follicular { background: rgba(212,168,83,0.1); color: #b8922a; }
+.cycle-phase.ovulation { background: rgba(126,206,193,0.1); color: #2a8a7a; }
+.cycle-phase.luteal { background: rgba(197,163,207,0.1); color: #7a5a8a; }
+
+/* ========== SIGNATURE FEATURES HEADER ========== */
+.sig-header {
+  text-align: center;
+  padding: 7rem 2rem 2rem;
+  background: linear-gradient(180deg, var(--cream) 0%, #F0E8F4 100%);
+}
+
+.sig-header .section-title {
+  margin-bottom: 0.8rem;
+}
+
+.sig-header-sub {
+  font-size: 1.1rem;
+  color: var(--text-light);
+  max-width: 650px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* ========== FEATURE DEEP-DIVE (shared) ========== */
+.feature-dive {
+  padding: 5rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-dive .fd-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.feature-dive.reverse .fd-inner {
+  direction: rtl;
+}
+
+.feature-dive.reverse .fd-inner > * {
+  direction: ltr;
+}
+
+@media (max-width: 900px) {
+  .feature-dive .fd-inner,
+  .feature-dive.reverse .fd-inner {
+    grid-template-columns: 1fr;
+    direction: ltr;
+  }
+}
+
+.fd-content {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: all 0.8s ease;
+}
+
+.fd-content.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.feature-dive.reverse .fd-content {
+  transform: translateX(40px);
+}
+
+.feature-dive.reverse .fd-content.visible {
+  transform: translateX(0);
+}
+
+.fd-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1rem;
+  border-radius: 100px;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 1.2rem;
+}
+
+.fd-badge.geo { background: rgba(126,206,193,0.15); color: #2a8a7a; }
+.fd-badge.work { background: rgba(126,181,214,0.15); color: #3a7aaa; }
+.fd-badge.learn { background: rgba(212,168,83,0.15); color: #9a7a2a; }
+
+.fd-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 900;
+  color: var(--plum-deep);
+  line-height: 1.25;
+  margin-bottom: 1rem;
+}
+
+.fd-desc {
+  font-size: 1.05rem;
+  color: var(--text-light);
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+}
+
+.fd-desc strong {
+  color: var(--plum);
+}
+
+.fd-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+
+.fd-pill {
+  padding: 0.5rem 1rem;
+  border-radius: 100px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: 1px solid rgba(107,45,91,0.1);
+  background: var(--white);
+  color: var(--plum);
+  transition: all 0.3s ease;
+}
+
+.fd-pill:hover {
+  background: var(--plum);
+  color: var(--white);
+  border-color: var(--plum);
+  transform: translateY(-2px);
+}
+
+/* ========== GEO MAP MOCKUP ========== */
+.geo-mockup {
+  position: relative;
+  opacity: 0;
+  transform: translateX(40px);
+  transition: all 0.8s ease 0.2s;
+}
+
+.geo-mockup.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.geo-phone {
+  width: 320px;
+  margin: 0 auto;
+  background: #1a1a2e;
+  border-radius: 36px;
+  padding: 12px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.25);
+  position: relative;
+}
+
+.geo-phone-notch {
+  width: 120px;
+  height: 24px;
+  background: #1a1a2e;
+  border-radius: 0 0 16px 16px;
+  margin: 0 auto;
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.geo-screen {
+  background: #e8f4e8;
+  border-radius: 26px;
+  overflow: hidden;
+  position: relative;
+  height: 480px;
+}
+
+.geo-map {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(126,206,193,0.3) 0%, transparent 40%),
+    radial-gradient(circle at 70% 60%, rgba(212,168,83,0.2) 0%, transparent 35%),
+    linear-gradient(135deg, #d4e8d0 0%, #e8f0e4 50%, #d8e4d0 100%);
+}
+
+.geo-road {
+  position: absolute;
+  background: rgba(255,255,255,0.7);
+  border-radius: 2px;
+}
+
+.geo-road.h1 { top: 35%; left: 0; right: 0; height: 4px; }
+.geo-road.h2 { top: 65%; left: 0; right: 0; height: 3px; }
+.geo-road.v1 { left: 25%; top: 0; bottom: 0; width: 4px; }
+.geo-road.v2 { left: 60%; top: 0; bottom: 0; width: 3px; }
+.geo-road.v3 { left: 80%; top: 0; bottom: 0; width: 3px; }
+
+.geo-pin {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  z-index: 3;
+}
+
+.geo-pin span {
+  transform: rotate(45deg);
+}
+
+.geo-pin.user {
+  background: var(--plum);
+  top: 48%;
+  left: 42%;
+  animation: userPulseMove 8s ease-in-out infinite;
+  z-index: 5;
+}
+
+@keyframes userPulseMove {
+  0%, 100% { top: 48%; left: 42%; }
+  25% { top: 38%; left: 50%; }
+  50% { top: 30%; left: 58%; }
+  75% { top: 42%; left: 55%; }
+}
+
+.geo-pin.user::after {
+  content: '';
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid var(--plum);
+  opacity: 0.3;
+  animation: radiusPulse 2s ease-in-out infinite;
+  transform: rotate(45deg);
+}
+
+@keyframes radiusPulse {
+  0%, 100% { transform: rotate(45deg) scale(0.8); opacity: 0.4; }
+  50% { transform: rotate(45deg) scale(1.3); opacity: 0.1; }
+}
+
+.geo-pin.grocery { background: var(--mint); top: 25%; left: 55%; }
+.geo-pin.medical { background: var(--rose); top: 60%; left: 72%; }
+.geo-pin.store { background: var(--gold); top: 70%; left: 30%; }
+
+.geo-notif {
+  position: absolute;
+  bottom: 20px;
+  left: 12px;
+  right: 12px;
+  background: var(--white);
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: notifSlideUp 1s ease-out 1.5s both, notifPulse 4s ease-in-out 2.5s infinite;
+}
+
+@keyframes notifSlideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes notifPulse {
+  0%, 100% { box-shadow: 0 8px 30px rgba(0,0,0,0.15); }
+  50% { box-shadow: 0 8px 30px rgba(126,206,193,0.4); }
+}
+
+.geo-notif-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--mint), #5ab5a5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.geo-notif-text {
+  flex: 1;
+}
+
+.geo-notif-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--plum-deep);
+  margin-bottom: 2px;
+}
+
+.geo-notif-body {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  line-height: 1.4;
+}
+
+/* ========== SMART FILTER RULES ========== */
+.smart-rules {
+  margin-top: 1.5rem;
+}
+
+.smart-rule {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid rgba(107,45,91,0.06);
+}
+
+.smart-rule:last-child { border-bottom: none; }
+
+.sr-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  background: rgba(126,206,193,0.12);
+}
+
+.sr-text {
+  font-size: 0.9rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.sr-text strong {
+  color: var(--plum);
+}
+
+.sr-keyword {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--mint), #5ab5a5);
+  color: white;
+  padding: 1px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+/* ========== WORK-AWARE TIMELINE ========== */
+.fd-bg-work {
+  background: linear-gradient(180deg, #F0E8F4 0%, var(--cream) 100%);
+}
+
+.work-mockup {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: all 0.8s ease 0.2s;
+}
+
+.work-mockup.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.work-timeline {
+  background: var(--white);
+  border-radius: 24px;
+  padding: 2rem;
+  box-shadow: 0 15px 60px rgba(107,45,91,0.1);
+  border: 1px solid rgba(107,45,91,0.06);
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.wt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(107,45,91,0.08);
+}
+
+.wt-day {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--plum-deep);
+}
+
+.wt-badge {
+  padding: 0.3rem 0.8rem;
+  border-radius: 100px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.wt-badge.heavy { background: rgba(232,82,111,0.12); color: var(--rose); }
+.wt-badge.light { background: rgba(126,206,193,0.12); color: #2a8a7a; }
+
+.wt-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.wt-slot {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.7rem 1rem;
+  border-radius: 14px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.wt-slot:hover {
+  transform: translateX(4px);
+}
+
+.wt-slot.work {
+  background: rgba(126,181,214,0.1);
+  border-left: 3px solid var(--sky);
+}
+
+.wt-slot.personal {
+  background: rgba(197,163,207,0.1);
+  border-left: 3px solid var(--lavender);
+}
+
+.wt-slot.errand {
+  background: rgba(126,206,193,0.1);
+  border-left: 3px solid var(--mint);
+}
+
+.wt-slot.learning {
+  background: rgba(212,168,83,0.1);
+  border-left: 3px solid var(--gold);
+}
+
+.wt-slot.rest {
+  background: rgba(232,82,111,0.06);
+  border-left: 3px solid var(--rose-soft);
+}
+
+.wt-time {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-light);
+  width: 48px;
+  flex-shrink: 0;
+}
+
+.wt-label {
+  font-size: 0.85rem;
+  color: var(--text);
+  font-weight: 500;
+  flex: 1;
+}
+
+.wt-ai-tag {
+  font-size: 0.6rem;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, var(--plum), var(--rose));
+  color: white;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.wt-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+.wt-divider-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(107,45,91,0.1), transparent);
+}
+
+.wt-divider-text {
+  font-size: 0.65rem;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 600;
+}
+
+.wt-shift-note {
+  margin-top: 1rem;
+  padding: 0.8rem 1rem;
+  background: linear-gradient(135deg, rgba(197,163,207,0.1), rgba(126,181,214,0.08));
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.78rem;
+  color: var(--plum);
+  font-weight: 500;
+}
+
+.wt-shift-icon {
+  font-size: 1.1rem;
+}
+
+/* ========== AI INSTRUCTOR ========== */
+.fd-bg-learn {
+  background: linear-gradient(180deg, var(--cream) 0%, #FFF5E6 100%);
+}
+
+.learn-mockup {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: all 0.8s ease 0.2s;
+}
+
+.learn-mockup.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.learn-chat {
+  background: var(--white);
+  border-radius: 24px;
+  padding: 1.5rem;
+  box-shadow: 0 15px 60px rgba(107,45,91,0.1);
+  border: 1px solid rgba(107,45,91,0.06);
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.lc-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(107,45,91,0.08);
+  margin-bottom: 1rem;
+}
+
+.lc-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--coral));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+}
+
+.lc-info {
+  flex: 1;
+}
+
+.lc-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--plum-deep);
+}
+
+.lc-status {
+  font-size: 0.7rem;
+  color: var(--mint);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.lc-status::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--mint);
+  border-radius: 50%;
+}
+
+.lc-personality-tag {
+  padding: 0.3rem 0.7rem;
+  border-radius: 8px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: rgba(212,168,83,0.12);
+  color: #9a7a2a;
+}
+
+.lc-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.lc-msg {
+  max-width: 85%;
+  padding: 0.8rem 1rem;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  opacity: 0;
+  animation: msgAppear 0.5s ease-out forwards;
+}
+
+.lc-msg:nth-child(1) { animation-delay: 0.5s; }
+.lc-msg:nth-child(2) { animation-delay: 1.2s; }
+.lc-msg:nth-child(3) { animation-delay: 2s; }
+.lc-msg:nth-child(4) { animation-delay: 2.8s; }
+.lc-msg:nth-child(5) { animation-delay: 3.6s; }
+
+@keyframes msgAppear {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.lc-msg.ai {
+  background: linear-gradient(135deg, #F8F0FF, #F0F0FF);
+  color: var(--text);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+.lc-msg.user {
+  background: linear-gradient(135deg, var(--plum), #8B3A7F);
+  color: white;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+
+.lc-msg .ai-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--plum);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.lc-practice {
+  background: rgba(212,168,83,0.08);
+  border: 1px solid rgba(212,168,83,0.15);
+  border-radius: 14px;
+  padding: 1rem;
+  margin-top: 0.5rem;
+}
+
+.lc-practice-header {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.lc-practice-task {
+  font-size: 0.82rem;
+  color: var(--text);
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+}
+
+.lc-practice-apply {
+  font-size: 0.72rem;
+  color: var(--text-light);
+  font-style: italic;
+}
+
+.lc-typing {
+  display: flex;
+  gap: 4px;
+  padding: 0.8rem 1rem;
+  align-self: flex-start;
+}
+
+.lc-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--lavender);
+  border-radius: 50%;
+  animation: typingDot 1.4s ease-in-out infinite;
+}
+
+.lc-dot:nth-child(2) { animation-delay: 0.2s; }
+.lc-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingDot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* Feature section backgrounds */
+.fd-bg-geo {
+  background: linear-gradient(180deg, var(--cream) 0%, #E8F5F0 50%, #F0E8F4 100%);
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <a href="#" class="nav-logo">HER<span class="accent">-OS</span></a>
+  <ul class="nav-links">
+    <li><a href="#themes">8 Themes</a></li>
+    <li><a href="#signature">Signature AI</a></li>
+    <li><a href="#cycle">Cycle-Aware</a></li>
+    <li><a href="#unique">Why Unique</a></li>
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="app.html" class="nav-cta">Launch App ✦</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-particles" id="particles"></div>
+  <div class="hero-badge">The Life Operating System for Women</div>
+  <h1 class="hero-title">
+    AI <span class="accent">HER‑OS</span>
+  </h1>
+  <p class="hero-subtitle">
+    One intelligent brain. Eight life dimensions. Zero compromises.<br>
+    The world's first AI that understands the full spectrum of a woman's life.
+  </p>
+  <div class="hero-cta">
+    <button class="btn-primary" onclick="document.getElementById('themes').scrollIntoView({behavior:'smooth'})">Explore All 8 Themes</button>
+    <button class="btn-ghost" onclick="document.getElementById('unique').scrollIntoView({behavior:'smooth'})">Why It's Unique</button>
+    <a href="app.html" class="btn-primary" style="text-decoration:none;">Launch App ✦</a>
+  </div>
+  <div class="hero-scroll-indicator">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- MANIFESTO -->
+<section class="manifesto">
+  <div class="manifesto-inner">
+    <p class="manifesto-quote" id="manifesto-quote">
+      "She doesn't need another app. She needs an AI that sees her whole life — and helps her run it."
+    </p>
+    <div class="manifesto-line"></div>
+    <p class="manifesto-text" id="manifesto-text">
+      AI HER-OS is the world's first Life Operating System designed exclusively for women. It integrates productivity, finance, wellness, leadership, and personal branding into one cycle-aware, emotionally intelligent AI brain — because her life isn't compartmentalized, and her tools shouldn't be either.
+    </p>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-strip">
+  <div class="stat-item">
+    <div class="stat-number" data-count="8">0</div>
+    <div class="stat-label">Life Dimensions</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number" data-count="1">0</div>
+    <div class="stat-label">Unified AI Brain</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number" data-count="4">0</div>
+    <div class="stat-label">Cycle Phases Tracked</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number special" data-count="0">∞</div>
+    <div class="stat-label">Women Empowered</div>
+  </div>
+</section>
+
+<!-- 8 THEMES -->
+<section id="themes">
+  <div class="themes-header">
+    <p class="section-label">Competition Alignment</p>
+    <h2 class="section-title">8 Themes. One Seamless System.</h2>
+  </div>
+
+  <div class="themes-grid">
+    <!-- Theme 1 -->
+    <div class="theme-card">
+      <div class="theme-number">01</div>
+      <span class="theme-icon">⚡</span>
+      <h3 class="theme-name">Daily Work Productivity</h3>
+      <p class="theme-feature-title">AI Auto-Productivity Engine</p>
+      <ul class="theme-features">
+        <li>Plans her day based on energy levels</li>
+        <li>Suggests "focus blocks" when energy peaks</li>
+        <li>Detects burnout patterns & rearranges tasks</li>
+        <li>Converts long tasks into microtasks automatically</li>
+      </ul>
+      <div class="theme-matched"><span class="check">✓</span> Theme Matched</div>
+    </div>
+
+    <!-- Theme 2 -->
+    <div class="theme-card">
+      <div class="theme-number">02</div>
+      <span class="theme-icon">📅</span>
+      <h3 class="theme-name">Time Management & Planning</h3>
+      <p class="theme-feature-title">Predictive Smart Scheduler</p>
+      <ul class="theme-features">
+        <li>Smart daily schedules that adapt</li>
+        <li>Monthly planning synced to menstrual cycle</li>
+        <li>Auto-reminders for work, home, kids, health</li>
+        <li>Predictive planning: sees workload before she does</li>
+      </ul>
+      <div class="theme-matched"><span class="check">✓</span> Theme Matched</div>
+    </div>
+
+    <!-- Theme 3 -->
+    <div class="theme-card">
+      <div class="theme-number">03</div>
+      <span class="theme-icon">🎓</span>
+      <h3 class="theme-name">Learning & Upskilling</h3>
+      <p class="theme-feature-title">AI Skill Path Generator</p>
+      <ul class="theme-features">
+        <li>Recommends upskilling paths for her role</li>
+        <li>10-minute AI learning capsules</li>
+        <li>Auto-generates personalized micro-courses</li>
+        <li>Weekly growth progress dashboard</li>
+      </ul>
+      <div class="theme-matched"><span class="check">✓</span> Theme Matched</div>
+    </div>
+
+    <!-- Theme 4 -->
+    <div class="theme-card">
+      <div class="theme-number">04</div>
+      <span class="theme-icon">🏠</span>
+      <h3 class="theme-name">Home & Personal Life</h3>
+      <p class="theme-feature-title">Home Intelligence Manager</p>
+      <ul class="theme-features">
+        <li>Tracks groceries & creates meal plans</li>
+        <li>Manages family schedules seamlessly</li>
+        <li>Suggests fair chore distribution</li>
+        <li>Predicts emotional overload & reassigns tasks</li>
+      </ul>
+      <div class="theme-matched"><span class="check">✓</span> Theme Matched</div>
+    </div>
+
+    <!-- Theme 5 -->
+    <div class="theme-card">
+      <div class="theme-number">05</div>
+      <span class="theme-icon">💰</span>
+      <h3 class="theme-name">Financial Awareness</h3>
+      <p class="theme-feature-title">AI Money Mentor for Women</p>
+      <ul class="theme-features">
+        <li>Builds personalized budgets</li>
+        <li>Identifies overspending patterns</li>
+        <li>Suggests micro-investments</li>
+        <li>Salary negotiation scripts & coaching</li>
+        <li>Finance education in simple, friendly language</li>
+      </ul>
+      <div class="theme-matched"><span class="check">✓</span> Theme Matched</div>
+    </div>
+
+    <!-- Theme 6 -->
+    <div class="theme-card">
+      <div class="theme-number">06</div>
+      <span class="theme-icon">👑</span>
+      <h3 class="theme-name">Communication & Leadership</h3>
+      <p class="theme-feature-title">Leadership Confidence Suite</p>
+      <ul class="theme-features">
+        <li>Conversation analysis for assertiveness</li>
+        <li>Presentation coaching & feedback</li>
+        <li>Voice-tone confidence training</li>
+        <li>Smart email rewrites to sound stronger</li>
+        <li>Leadership micro-lessons</li>
+      </ul>
+      <div class="theme-matched"><span class="check">✓</span> Theme Matched</div>
+    </div>
+
+    <!-- Theme 7 -->
+    <div class="theme-card">
+      <div class="theme-number">07</div>
+      <span class="theme-icon">✨</span>
+      <h3 class="theme-name">Personal Branding</h3>
+      <p class="theme-feature-title">Digital Identity Builder</p>
+      <ul class="theme-features">
+        <li>Builds her digital portfolio</li>
+        <li>Social media content generation</li>
+        <li>LinkedIn optimization & strategy</li>
+        <li>Elevator pitch for job or business</li>
+        <li>Success tracker timeline</li>
+      </ul>
+      <div class="theme-matched"><span class="check">✓</span> Theme Matched</div>
+    </div>
+
+    <!-- Theme 8 -->
+    <div class="theme-card">
+      <div class="theme-number">08</div>
+      <span class="theme-icon">💜</span>
+      <h3 class="theme-name">Well-Being & Self Care</h3>
+      <p class="theme-feature-title">AI Wellness Guardian</p>
+      <ul class="theme-features">
+        <li>Stress detection from voice patterns</li>
+        <li>Smart break reminders & wellness rituals</li>
+        <li>Mental health score tracking</li>
+        <li>Cycle-based self-care routines</li>
+        <li>Sleep improvement guidance</li>
+      </ul>
+      <div class="theme-matched"><span class="check">✓</span> Theme Matched</div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SIGNATURE FEATURES ==================== -->
+<section id="signature" class="sig-header">
+  <p class="section-label">Signature Intelligence</p>
+  <h2 class="section-title">Three Features That Change Everything</h2>
+  <p class="sig-header-sub">
+    These aren't incremental improvements. These are paradigm shifts in how AI serves a woman's daily life — proactive, intelligent, and deeply personal.
+  </p>
+</section>
+
+<!-- FEATURE 1: SMART GEO-REMINDERS -->
+<section class="feature-dive fd-bg-geo">
+  <div class="fd-inner">
+    <div class="fd-content" id="fd-geo-content">
+      <div class="fd-badge geo">📍 Home & Personal Life</div>
+      <h3 class="fd-title">Smart Geo-Reminders:<br>Your World Becomes Your To-Do List</h3>
+      <p class="fd-desc">
+        AI HER-OS keeps <strong>Live Location always on</strong>. The moment you're near a grocery store or medical shop, it automatically reminds you: <strong>"You're here — buy these items."</strong> No forgetting. No manual checking. Completely proactive.
+      </p>
+      <div class="fd-pills">
+        <span class="fd-pill">Groceries</span>
+        <span class="fd-pill">Medicines</span>
+        <span class="fd-pill">Kids' Supplies</span>
+        <span class="fd-pill">Home Essentials</span>
+      </div>
+
+      <div class="smart-rules">
+        <div class="smart-rule">
+          <div class="sr-icon">🏪</div>
+          <div class="sr-text"><strong>User-selected stores</strong> always trigger reminders — your trusted locations <span class="sr-keyword">ALWAYS</span></div>
+        </div>
+        <div class="smart-rule">
+          <div class="sr-icon">🏷️</div>
+          <div class="sr-text">Other stores trigger <strong>only if</strong> the store matches your item category (grocery, medical, etc.) <span class="sr-keyword">CATEGORY MATCH</span></div>
+        </div>
+        <div class="smart-rule">
+          <div class="sr-icon">📡</div>
+          <div class="sr-text">Only triggers when you're within a <strong>short radius</strong> — not across the street <span class="sr-keyword">PROXIMITY</span></div>
+        </div>
+        <div class="smart-rule">
+          <div class="sr-icon">🔕</div>
+          <div class="sr-text"><strong>Won't repeat</strong> if you dismissed the same reminder recently <span class="sr-keyword">ANTI-SPAM</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="geo-mockup" id="geo-mockup">
+      <div class="geo-phone">
+        <div class="geo-phone-notch"></div>
+        <div class="geo-screen">
+          <div class="geo-map">
+            <div class="geo-road h1"></div>
+            <div class="geo-road h2"></div>
+            <div class="geo-road v1"></div>
+            <div class="geo-road v2"></div>
+            <div class="geo-road v3"></div>
+            <div class="geo-pin grocery"><span>🥦</span></div>
+            <div class="geo-pin medical"><span>💊</span></div>
+            <div class="geo-pin store"><span>🛍️</span></div>
+            <div class="geo-pin user"><span>👤</span></div>
+          </div>
+          <div class="geo-notif">
+            <div class="geo-notif-icon">📍</div>
+            <div class="geo-notif-text">
+              <div class="geo-notif-title">You're near Fresh Mart!</div>
+              <div class="geo-notif-body">Buy: Milk, Eggs, Spinach, Bread<br>From your grocery list — 3 items pending</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURE 2: WORK-AWARE PERSONAL PLANNING -->
+<section class="feature-dive fd-bg-work reverse">
+  <div class="fd-inner">
+    <div class="work-mockup" id="work-mockup">
+      <div class="work-timeline">
+        <div class="wt-header">
+          <div class="wt-day">Tuesday, March 25</div>
+          <div class="wt-badge heavy">Heavy Workday</div>
+        </div>
+        <div class="wt-slots">
+          <div class="wt-slot work">
+            <div class="wt-time">9:00</div>
+            <div class="wt-label">Sprint Planning Meeting</div>
+          </div>
+          <div class="wt-slot work">
+            <div class="wt-time">10:30</div>
+            <div class="wt-label">Client Presentation</div>
+          </div>
+          <div class="wt-slot work">
+            <div class="wt-time">12:00</div>
+            <div class="wt-label">Code Review Deadline</div>
+          </div>
+          <div class="wt-slot rest">
+            <div class="wt-time">1:00</div>
+            <div class="wt-label">Lunch + Decompress</div>
+            <div class="wt-ai-tag">AI Moved</div>
+          </div>
+          <div class="wt-slot work">
+            <div class="wt-time">2:00</div>
+            <div class="wt-label">Bug Fix Sprint</div>
+          </div>
+        </div>
+        <div class="wt-divider">
+          <div class="wt-divider-line"></div>
+          <div class="wt-divider-text">Personal Tasks Shifted</div>
+          <div class="wt-divider-line"></div>
+        </div>
+        <div class="wt-slots">
+          <div class="wt-slot personal">
+            <div class="wt-time">6:30</div>
+            <div class="wt-label">Grocery Run (quick list)</div>
+            <div class="wt-ai-tag">AI Shifted</div>
+          </div>
+          <div class="wt-slot learning">
+            <div class="wt-time">8:00</div>
+            <div class="wt-label">10-min Learning Capsule</div>
+            <div class="wt-ai-tag">AI Kept</div>
+          </div>
+        </div>
+        <div class="wt-shift-note">
+          <span class="wt-shift-icon">🧠</span>
+          AI detected heavy workday — shifted 3 personal tasks to tomorrow (light day)
+        </div>
+      </div>
+    </div>
+
+    <div class="fd-content" id="fd-work-content">
+      <div class="fd-badge work">⚡ Productivity + Time Management</div>
+      <h3 class="fd-title">Work-Aware Personal Planning:<br>Your Life Auto-Balances</h3>
+      <p class="fd-desc">
+        The system understands your <strong>professional workload</strong> — meetings, deadlines, busy days — and then <strong>auto-plans personal tasks around it</strong>. If work is heavy, it shifts personal tasks. If work is light, it schedules errands, learning, or hobbies. Your day stays balanced automatically.
+      </p>
+      <div class="fd-pills">
+        <span class="fd-pill">Calendar Sync</span>
+        <span class="fd-pill">Workload Detection</span>
+        <span class="fd-pill">Auto-Rebalance</span>
+        <span class="fd-pill">Stress-Aware</span>
+        <span class="fd-pill">Energy Mapping</span>
+      </div>
+      <p class="fd-desc" style="margin-bottom:0; font-size: 0.95rem;">
+        Heavy day at work? Errands move to tomorrow. Light afternoon? Time for that hobby you've been postponing. <strong>No manual rescheduling ever.</strong>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURE 3: AI INSTRUCTOR -->
+<section class="feature-dive fd-bg-learn">
+  <div class="fd-inner">
+    <div class="fd-content" id="fd-learn-content">
+      <div class="fd-badge learn">🎓 Learning & Upskilling</div>
+      <h3 class="fd-title">AI Instructor:<br>A Coach Built Around Your Brain</h3>
+      <p class="fd-desc">
+        The AI studies your <strong>background, behavior, and learning style</strong>. Then it becomes a personal instructor — teaching any skill you want to learn, giving you <strong>practice tasks</strong>, and guiding you on <strong>where and how to apply that skill in real life</strong>. It's like having a customized coach 24/7.
+      </p>
+      <div class="fd-pills">
+        <span class="fd-pill">Visual Learner</span>
+        <span class="fd-pill">Hands-On Practice</span>
+        <span class="fd-pill">Micro-Lessons</span>
+        <span class="fd-pill">Real-World Application</span>
+        <span class="fd-pill">Progress Tracking</span>
+      </div>
+      <p class="fd-desc" style="margin-bottom:0; font-size: 0.95rem;">
+        Not a generic course. Not a one-size-fits-all tutorial. A living instructor that adapts its <strong>pace, depth, examples, and assignments</strong> to how your unique brain learns best.
+      </p>
+    </div>
+
+    <div class="learn-mockup" id="learn-mockup">
+      <div class="learn-chat">
+        <div class="lc-header">
+          <div class="lc-avatar">🧠</div>
+          <div class="lc-info">
+            <div class="lc-name">HER-OS Instructor</div>
+            <div class="lc-status">Adapted to your style</div>
+          </div>
+          <div class="lc-personality-tag">Visual Learner</div>
+        </div>
+        <div class="lc-messages">
+          <div class="lc-msg ai">
+            <span class="ai-label">AI Instructor</span>
+            I see you learn best through visual examples. Let me teach you <strong>data analysis in Excel</strong> using diagrams and real screenshots instead of text-heavy docs.
+          </div>
+          <div class="lc-msg user">
+            Yes! I always get lost in text tutorials. Show me visually.
+          </div>
+          <div class="lc-msg ai">
+            <span class="ai-label">AI Instructor</span>
+            Perfect. Here's today's 10-minute capsule: <strong>VLOOKUP in 3 visual steps</strong>. I've matched it to your work data so it feels real.
+          </div>
+          <div class="lc-msg ai">
+            <div class="lc-practice">
+              <div class="lc-practice-header">📝 Practice Task</div>
+              <div class="lc-practice-task">Use VLOOKUP to match employee IDs with department names in your team spreadsheet.</div>
+              <div class="lc-practice-apply">💡 Real-life application: Automate your next monthly report</div>
+            </div>
+          </div>
+          <div class="lc-msg user">
+            This is exactly how I wanted to learn. Can you also teach me pivot tables next?
+          </div>
+        </div>
+        <div class="lc-typing">
+          <div class="lc-dot"></div>
+          <div class="lc-dot"></div>
+          <div class="lc-dot"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CYCLE AWARENESS -->
+<section id="cycle" class="cycle-section">
+  <div class="cycle-inner">
+    <div class="cycle-visual">
+      <div class="cycle-ring-container">
+        <div class="cycle-ring-bg"></div>
+        <span class="cycle-ring-label top">Menstrual</span>
+        <span class="cycle-ring-label right">Follicular</span>
+        <span class="cycle-ring-label bottom">Ovulation</span>
+        <span class="cycle-ring-label left">Luteal</span>
+        <div class="cycle-center">
+          <span class="cycle-center-icon">🌙</span>
+          <span class="cycle-center-text">Cycle-Aware AI</span>
+        </div>
+      </div>
+    </div>
+    <div class="cycle-content">
+      <h3>The First AI That Adapts to Her Cycle</h3>
+      <p>
+        AI HER-OS doesn't just track periods. It adapts every feature — productivity, finance, wellness, learning — to align with her biological rhythm. Because her energy, focus, and needs change throughout the month.
+      </p>
+      <div class="cycle-phases">
+        <div class="cycle-phase menstrual">🌑 Menstrual — Rest & Reflect</div>
+        <div class="cycle-phase follicular">🌒 Follicular — Plan & Create</div>
+        <div class="cycle-phase ovulation">🌕 Ovulation — Lead & Connect</div>
+        <div class="cycle-phase luteal">🌘 Luteal — Organize & Prepare</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section id="architecture" class="architecture">
+  <div class="arch-inner">
+    <p class="section-label">System Design</p>
+    <h2 class="section-title">One Brain. Eight Dimensions.</h2>
+    <div class="arch-visual">
+      <div class="arch-ring arch-ring-1"></div>
+      <div class="arch-ring arch-ring-2"></div>
+      <div class="arch-core">
+        <div class="arch-core-text">AI<br>HER-OS<br>Core</div>
+      </div>
+    </div>
+    <div class="arch-nodes">
+      <div class="arch-node">⚡ Productivity</div>
+      <div class="arch-node">📅 Planning</div>
+      <div class="arch-node">🎓 Learning</div>
+      <div class="arch-node">🏠 Home Life</div>
+      <div class="arch-node">💰 Finance</div>
+      <div class="arch-node">👑 Leadership</div>
+      <div class="arch-node">✨ Branding</div>
+      <div class="arch-node">💜 Wellness</div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY UNIQUE -->
+<section id="unique" class="unique-section">
+  <div class="unique-inner">
+    <div class="unique-header">
+      <p class="section-label">The Market Gap</p>
+      <h2 class="section-title">Why Nothing Like This Exists</h2>
+    </div>
+
+    <div class="gap-grid">
+      <div class="gap-card">
+        <div class="gap-x"><span class="x">✗</span></div>
+        <p class="gap-text">No app covers productivity + finance + self-care + leadership in one platform</p>
+      </div>
+      <div class="gap-card">
+        <div class="gap-x"><span class="x">✗</span></div>
+        <p class="gap-text">No app is cycle-aware across all features — adapting to her biology</p>
+      </div>
+      <div class="gap-card">
+        <div class="gap-x"><span class="x">✗</span></div>
+        <p class="gap-text">No app adjusts schedule based on emotional load and energy patterns</p>
+      </div>
+      <div class="gap-card">
+        <div class="gap-x"><span class="x">✗</span></div>
+        <p class="gap-text">No app supports home + career + personal brand together seamlessly</p>
+      </div>
+      <div class="gap-card">
+        <div class="gap-x"><span class="x">✗</span></div>
+        <p class="gap-text">No existing "Life Operating System" designed specifically for women</p>
+      </div>
+    </div>
+
+    <div class="category-statement" id="category-statement">
+      <h3>This is a <span class="gold">category-creating</span> idea.</h3>
+      <p>AI HER-OS doesn't compete — it creates an entirely new space.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-logo">AI HER<span class="accent">-OS</span></div>
+  <p class="footer-tagline">The Life Operating System for Women</p>
+  <div class="footer-links" style="display:flex;gap:2rem;justify-content:center;margin:1.5rem 0;">
+    <a href="app.html" style="color:var(--gold);text-decoration:none;font-weight:600;font-family:'Syne',sans-serif;letter-spacing:0.5px;transition:opacity 0.3s;">Launch App ✦</a>
+    <a href="architecture.html" style="color:var(--lavender);text-decoration:none;font-weight:500;font-family:'Syne',sans-serif;letter-spacing:0.5px;transition:opacity 0.3s;">View Architecture</a>
+  </div>
+  <div class="footer-line"></div>
+  <p class="footer-copy">AI HER-OS — A category-creating idea for the modern woman.</p>
+</footer>
+
+<script>
+// Particles
+(function() {
+  const container = document.getElementById('particles');
+  const colors = ['rgba(212,168,83,0.6)', 'rgba(232,82,111,0.4)', 'rgba(197,163,207,0.5)', 'rgba(126,206,193,0.4)', 'rgba(255,255,255,0.3)'];
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 6 + 2;
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.animationDuration = (Math.random() * 15 + 10) + 's';
+    p.style.animationDelay = (Math.random() * 15) + 's';
+    container.appendChild(p);
+  }
+})();
+
+// Navbar scroll
+window.addEventListener('scroll', function() {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 80);
+});
+
+// Intersection Observer for animations
+const observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.theme-card, .gap-card, .category-statement, .manifesto-quote, .manifesto-text, .fd-content, .geo-mockup, .work-mockup, .learn-mockup').forEach(function(el) {
+  observer.observe(el);
+});
+
+// Stagger theme cards
+const themeCards = document.querySelectorAll('.theme-card');
+const cardObserver = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if (entry.isIntersecting) {
+      const index = Array.from(themeCards).indexOf(entry.target);
+      setTimeout(function() {
+        entry.target.classList.add('visible');
+      }, index * 120);
+    }
+  });
+}, { threshold: 0.1 });
+
+themeCards.forEach(function(card) { cardObserver.observe(card); });
+
+// Gap cards stagger
+const gapCards = document.querySelectorAll('.gap-card');
+const gapObserver = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if (entry.isIntersecting) {
+      const index = Array.from(gapCards).indexOf(entry.target);
+      setTimeout(function() {
+        entry.target.classList.add('visible');
+      }, index * 150);
+    }
+  });
+}, { threshold: 0.1 });
+
+gapCards.forEach(function(card) { gapObserver.observe(card); });
+
+// Stat counter animation
+const statObserver = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if (entry.isIntersecting) {
+      const el = entry.target;
+      if (el.classList.contains('special')) return;
+      const target = parseInt(el.getAttribute('data-count'));
+      let current = 0;
+      const increment = target / 30;
+      const timer = setInterval(function() {
+        current += increment;
+        if (current >= target) {
+          el.textContent = target;
+          clearInterval(timer);
+        } else {
+          el.textContent = Math.floor(current);
+        }
+      }, 50);
+      statObserver.unobserve(el);
+    }
+  });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.stat-number').forEach(function(el) { statObserver.observe(el); });
+</script>
+
+</body>
+</html>
