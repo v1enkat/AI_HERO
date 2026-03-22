@@ -1,0 +1,7 @@
+{
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    "app.js": "app.state.js, app.ui.js, app.ai-engine.js, app.router.js, app.dashboard.js, app.productivity.js, app.scheduler.js, app.learning.js, app.home.js, app.finance.js, app.leadership.js, app.branding.js, app.wellness.js, app.ai-chat.js, app.settings.js, app.init.js"
+  }
+}
