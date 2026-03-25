@@ -1,26 +1,47 @@
 const Leadership = {
-  rewriteEmail() {
+  async rewriteEmail() {
     const text = document.getElementById('emailInput').value;
     const tone = document.getElementById('emailTone').value;
-    const result = AI.rewriteEmail(text, tone);
-    document.getElementById('emailResult').textContent = result;
-    document.getElementById('emailOutput').style.display = 'block';
+    const outputEl = document.getElementById('emailOutput');
+    const resultEl = document.getElementById('emailResult');
+
+    outputEl.style.display = 'block';
+    resultEl.textContent = '';
+    resultEl.parentElement.classList.add('llm-loading');
+
+    const result = await AI.rewriteEmailLLM(text, tone);
+    resultEl.textContent = result;
+    resultEl.parentElement.classList.remove('llm-loading');
   },
-  generatePitch() {
+  async generatePitch() {
     const role = document.getElementById('pitchRole').value;
     const achievement = document.getElementById('pitchAchievement').value;
-    const result = AI.generatePitch(role, achievement);
-    document.getElementById('pitchResult').textContent = result;
-    document.getElementById('pitchOutput').style.display = 'block';
+    const outputEl = document.getElementById('pitchOutput');
+    const resultEl = document.getElementById('pitchResult');
+
+    outputEl.style.display = 'block';
+    resultEl.textContent = '';
+    resultEl.parentElement.classList.add('llm-loading');
+
+    const result = await AI.generatePitchLLM(role, achievement);
+    resultEl.textContent = result;
+    resultEl.parentElement.classList.remove('llm-loading');
   },
-  negotiationScript() {
-    const result = AI.negotiationScript(
+  async negotiationScript() {
+    const resultEl = document.getElementById('negResult');
+    const outputEl = document.getElementById('negOutput');
+
+    outputEl.style.display = 'block';
+    resultEl.textContent = '';
+    resultEl.parentElement.classList.add('llm-loading');
+
+    const result = await AI.negotiationScriptLLM(
       document.getElementById('negCurrentSalary').value,
       document.getElementById('negDesiredSalary').value,
       document.getElementById('negReason').value
     );
-    document.getElementById('negResult').textContent = result;
-    document.getElementById('negOutput').style.display = 'block';
+    resultEl.textContent = result;
+    resultEl.parentElement.classList.remove('llm-loading');
   },
   nextLesson() {
     const lessons = AI.leadershipLessons;

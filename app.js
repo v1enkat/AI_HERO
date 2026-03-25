@@ -1,5 +1,5 @@
 /* ================================================================
-   AI HER-OS — Full Application Logic
+   AI HER-AI — Full Application Logic
    ================================================================ */
 
 // ==================== STATE ====================
@@ -22,17 +22,21 @@ const S = {
   breakTimer: null,
   focusTimer: null,
   schedulerOffset: 0,
+  chatHistory: [],
+  instructorHistory: [],
+  instructorTopic: null,
+  instructorWeek: 0,
 
   load() {
     try {
-      const d = JSON.parse(localStorage.getItem('heros_data'));
+      const d = JSON.parse(localStorage.getItem('herai_data'));
       if (d) Object.assign(this, { ...this, ...d });
     } catch (e) {}
   },
   save() {
     const d = {};
-    ['user','tasks','events','groceries','expenses','mealPlan','familyEvents','geoReminders','skills','wins','moods','sleepLog','finance','cycle','settings'].forEach(k => d[k] = this[k]);
-    localStorage.setItem('heros_data', JSON.stringify(d));
+    ['user','tasks','events','groceries','expenses','mealPlan','familyEvents','geoReminders','skills','wins','moods','sleepLog','finance','cycle','settings','chatHistory','instructorTopic','instructorWeek'].forEach(k => d[k] = this[k]);
+    localStorage.setItem('herai_data', JSON.stringify(d));
   }
 };
 
@@ -350,7 +354,7 @@ const AI = {
     }
 
     if (lower.includes('hello') || lower.includes('hi') || lower.includes('hey')) {
-      return `${this.getGreeting()}! 👋 I'm your HER-OS AI.\n\nI can help with:\n• 📋 Tasks & productivity\n• 📅 Scheduling & planning\n• 💰 Finance & budgeting\n• 🎓 Learning & skills\n• 🏠 Home management\n• 💜 Wellness & mood\n• 👑 Leadership & communication\n• ✨ Personal branding\n\nJust ask me anything!`;
+      return `${this.getGreeting()}! 👋 I'm your HER-AI AI.\n\nI can help with:\n• 📋 Tasks & productivity\n• 📅 Scheduling & planning\n• 💰 Finance & budgeting\n• 🎓 Learning & skills\n• 🏠 Home management\n• 💜 Wellness & mood\n• 👑 Leadership & communication\n• ✨ Personal branding\n\nJust ask me anything!`;
     }
 
     if (lower.includes('motivat') || lower.includes('inspir') || lower.includes('encourage')) {
@@ -365,7 +369,7 @@ const AI = {
     }
 
     if (lower.includes('help') || lower.includes('what can you do')) {
-      return `I'm HER-OS, your Life Operating System AI! Here's what I can help with:\n\n⚡ Productivity: "How are my tasks?" / "Auto-schedule my day"\n📅 Planning: "What\'s my schedule?" / "Plan my week"\n💰 Finance: "How\'s my budget?" / "Spending advice"\n🎓 Learning: "Teach me something" / "Learning progress"\n🏠 Home: "Grocery list" / "Meal plan"\n💜 Wellness: "How am I feeling?" / "Cycle phase"\n👑 Leadership: "Help me with emails"\n✨ Branding: "Help with LinkedIn"\n\nJust type naturally — I understand context! 🧠`;
+      return `I'm HER-AI, your Life Operating System AI! Here's what I can help with:\n\n⚡ Productivity: "How are my tasks?" / "Auto-schedule my day"\n📅 Planning: "What\'s my schedule?" / "Plan my week"\n💰 Finance: "How\'s my budget?" / "Spending advice"\n🎓 Learning: "Teach me something" / "Learning progress"\n🏠 Home: "Grocery list" / "Meal plan"\n💜 Wellness: "How am I feeling?" / "Cycle phase"\n👑 Leadership: "Help me with emails"\n✨ Branding: "Help with LinkedIn"\n\nJust type naturally — I understand context! 🧠`;
     }
 
     return `I understand you're asking about "${msg}". Here are some things I can help with:\n\n• Type "tasks" to review your to-do list\n• Type "budget" for financial insights\n• Type "mood" for wellness check\n• Type "schedule" for your daily plan\n• Type "cycle" for cycle-phase recommendations\n\nI'm always learning to serve you better! 💜`;
@@ -397,6 +401,96 @@ const AI = {
     }
 
     return `I'd love to teach you about "${msg}"!\n\n${styleHints[style]}\n\nTo get started, I'll create a 4-week micro-course for you:\n\n1️⃣ Week 1: Fundamentals & core concepts\n2️⃣ Week 2: Building blocks & practice\n3️⃣ Week 3: Advanced techniques\n4️⃣ Week 4: Real-world project\n\n📝 First Practice Task:\nResearch 3 real-world examples of "${msg}" being used successfully. Write a 1-paragraph summary of each.\n\n💡 Real-life application: Apply this skill in your daily work within 2 weeks!\n\nShall I go deeper into Week 1?`;
+  },
+
+  _getApiKey() {
+    return (typeof CONFIG !== 'undefined' && CONFIG.GROQ_API_KEY) || S.settings.apiKey || '';
+  },
+
+  _getUserContext() {
+    const pending = S.tasks.filter(t => !t.done);
+    const totalSpent = S.expenses.reduce((s, e) => s + e.amount, 0);
+    const phase = this.getCyclePhase();
+    return `User context — Name: ${S.user.name || 'User'}, Energy: ${S.user.energy}, Pending tasks: ${pending.length}, Skills tracking: ${S.skills.length}, Budget: income ₹${S.finance.income} / spent ₹${totalSpent}, Cycle phase: ${phase.text || 'not set'}, Recent moods: ${S.moods.slice(-3).map(m => m.mood).join(', ') || 'none logged'}.`;
+  },
+
+  async callLLM(systemPrompt, messages, fallbackFn, maxTokens) {
+    const apiKey = this._getApiKey();
+    if (!apiKey) return fallbackFn();
+    try {
+      const model = (typeof CONFIG !== 'undefined' && CONFIG.GROQ_MODEL) || 'llama-3.3-70b-versatile';
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model, messages: [{ role: 'system', content: systemPrompt }, ...messages], max_tokens: maxTokens || 700, temperature: 0.7 })
+      });
+      if (!res.ok) return fallbackFn();
+      const data = await res.json();
+      return data.choices?.[0]?.message?.content || fallbackFn();
+    } catch (e) {
+      return fallbackFn();
+    }
+  },
+
+  async chatLLM(msg) {
+    const systemPrompt = `You are HER-AI, a warm, supportive AI Life Operating System designed for women. You help with productivity, scheduling, finance, wellness, learning, home management, leadership, and personal branding. Be conversational, empathetic, and actionable like a knowledgeable best friend. Use emojis naturally but not excessively. Keep responses concise (2-4 paragraphs max). Personalize using the user's data when relevant.\n\n${this._getUserContext()}`;
+
+    if (!S.chatHistory) S.chatHistory = [];
+    S.chatHistory.push({ role: 'user', content: msg });
+    if (S.chatHistory.length > 20) S.chatHistory = S.chatHistory.slice(-20);
+
+    const result = await this.callLLM(systemPrompt, S.chatHistory, () => this.chat(msg));
+
+    S.chatHistory.push({ role: 'assistant', content: result });
+    if (S.chatHistory.length > 20) S.chatHistory = S.chatHistory.slice(-20);
+
+    return result;
+  },
+
+  async rewriteEmailLLM(text, tone) {
+    if (!text.trim()) return 'Please enter an email draft first.';
+    const systemPrompt = `You are a professional communication coach for women in leadership. Rewrite the user's email draft in a "${tone}" tone. Remove weak language ("I think", "sorry", "just wanted to"). Make it confident, clear, and impactful. Keep the same core message. Return ONLY the rewritten email, no commentary.`;
+    return this.callLLM(systemPrompt, [{ role: 'user', content: text }], () => this.rewriteEmail(text, tone));
+  },
+
+  async generatePitchLLM(role, achievement) {
+    if (!role) return 'Please enter your role.';
+    const systemPrompt = `You are a career branding expert. Generate a compelling, natural-sounding elevator pitch (60-90 seconds when spoken). Make it confident, memorable, and authentic. Return ONLY the pitch text, no labels or commentary.`;
+    const userMsg = `Role: ${role}${achievement ? '\nKey achievement: ' + achievement : ''}`;
+    return this.callLLM(systemPrompt, [{ role: 'user', content: userMsg }], () => this.generatePitch(role, achievement));
+  },
+
+  async negotiationScriptLLM(current, desired, reason) {
+    if (!current || !desired) return 'Please fill in your salary details.';
+    const systemPrompt = `You are a salary negotiation coach for women. Create a natural, confident negotiation script. Include specific talking points, how to handle objections, and closing statements. Make it feel like a real conversation, not a template. Return ONLY the script.`;
+    const userMsg = `Current compensation: ${current}\nDesired compensation: ${desired}${reason ? '\nKey justification: ' + reason : ''}`;
+    return this.callLLM(systemPrompt, [{ role: 'user', content: userMsg }], () => this.negotiationScript(current, desired, reason));
+  },
+
+  async linkedinHeadlinesLLM(role, skills) {
+    if (!role) return 'Enter your role first.';
+    const systemPrompt = `You are a LinkedIn branding specialist. Generate exactly 3 compelling, professional LinkedIn headlines. Each should be unique in style — one value-driven, one achievement-focused, one personality-forward. Separate them with blank lines. Return ONLY the 3 headlines, no numbering or labels.`;
+    const userMsg = `Role: ${role}${skills ? '\nSkills: ' + skills : ''}`;
+    return this.callLLM(systemPrompt, [{ role: 'user', content: userMsg }], () => this.linkedinHeadlines(role, skills));
+  },
+
+  async socialPostLLM(topic, platform) {
+    if (!topic) return 'Enter a topic first.';
+    const systemPrompt = `You are a social media strategist. Create one engaging ${platform || 'general'} post about the given topic. Match the platform's tone and format (LinkedIn = professional storytelling, Twitter = concise thread hooks, Instagram = visual + relatable). Include relevant hashtags. Return ONLY the post content.`;
+    return this.callLLM(systemPrompt, [{ role: 'user', content: topic }], () => this.socialPost(topic, platform));
+  },
+
+  async instructorChatLLM(msg, style) {
+    const ruleResponse = this.instructorChat(msg, style);
+
+    const systemPrompt = `You are a patient, encouraging AI tutor inside HER-OS (a life OS for women). The student's learning style is "${style}".\n\nYou have a structured response ready. Rewrite it to sound like a warm, real human tutor — conversational, encouraging, with natural transitions. Keep ALL the factual content, examples, code snippets, quiz questions, and practice tasks intact. Just make the tone feel like a real person talking, not a textbook. Add brief encouraging remarks between sections. Do NOT remove or shorten any technical content.`;
+
+    return this.callLLM(systemPrompt, [{ role: 'user', content: `Student said: "${msg}"\n\nHere is the structured response to make conversational:\n\n${ruleResponse}` }], () => ruleResponse, 1500);
+  },
+
+  async getDashInsightLLM() {
+    const systemPrompt = `You are HER-AI, a personal productivity AI. Based on the user's data, give ONE specific, actionable insight in 1-2 sentences. Be warm and direct. Use an emoji at the start.\n\n${this._getUserContext()}`;
+    return this.callLLM(systemPrompt, [{ role: 'user', content: 'Give me a personalized insight for right now.' }], () => this.getDashInsight());
   }
 };
 
@@ -679,7 +773,7 @@ const Learning = {
     this.render();
     toast('🎓 Skill added! Start learning with AI Instructor below.', 'success');
   },
-  sendMsg() {
+  async sendMsg() {
     const input = document.getElementById('instructorInput');
     const msg = input.value.trim();
     if (!msg) return;
@@ -688,11 +782,20 @@ const Learning = {
     const container = document.getElementById('instructorMessages');
     container.innerHTML += `<div class="ic-msg user">${esc(msg)}</div>`;
 
-    const response = AI.instructorChat(msg, S.user.learningStyle);
-    setTimeout(() => {
-      container.innerHTML += `<div class="ic-msg ai"><span class="ic-label">AI Instructor</span>${response.replace(/\n/g, '<br>')}</div>`;
-      container.scrollTop = container.scrollHeight;
-    }, 600);
+    const thinkingId = 'inst-thinking-' + Date.now();
+    container.innerHTML += `<div class="ic-msg ai" id="${thinkingId}"><span class="ic-label">AI Instructor</span><span class="typing-indicator"><span></span><span></span><span></span></span></div>`;
+    container.scrollTop = container.scrollHeight;
+
+    try {
+      const response = await AI.instructorChatLLM(msg, S.user.learningStyle);
+      const el = document.getElementById(thinkingId);
+      if (el) el.innerHTML = `<span class="ic-label">AI Instructor</span>${response.replace(/\n/g, '<br>')}`;
+    } catch (e) {
+      const fallback = AI.instructorChat(msg, S.user.learningStyle);
+      const el = document.getElementById(thinkingId);
+      if (el) el.innerHTML = `<span class="ic-label">AI Instructor</span>${fallback.replace(/\n/g, '<br>')}`;
+    }
+    container.scrollTop = container.scrollHeight;
 
     if (S.skills.length > 0) {
       S.skills[0].minutes += 10;
@@ -1004,28 +1107,43 @@ const Finance = {
 
 // ==================== LEADERSHIP ====================
 const Leadership = {
-  rewriteEmail() {
+  async rewriteEmail() {
     const text = document.getElementById('emailInput').value;
     const tone = document.getElementById('emailTone').value;
-    const result = AI.rewriteEmail(text, tone);
-    document.getElementById('emailResult').textContent = result;
-    document.getElementById('emailOutput').style.display = 'block';
+    const outputEl = document.getElementById('emailOutput');
+    const resultEl = document.getElementById('emailResult');
+    outputEl.style.display = 'block';
+    resultEl.textContent = '';
+    resultEl.parentElement.classList.add('llm-loading');
+    const result = await AI.rewriteEmailLLM(text, tone);
+    resultEl.textContent = result;
+    resultEl.parentElement.classList.remove('llm-loading');
   },
-  generatePitch() {
+  async generatePitch() {
     const role = document.getElementById('pitchRole').value;
     const achievement = document.getElementById('pitchAchievement').value;
-    const result = AI.generatePitch(role, achievement);
-    document.getElementById('pitchResult').textContent = result;
-    document.getElementById('pitchOutput').style.display = 'block';
+    const outputEl = document.getElementById('pitchOutput');
+    const resultEl = document.getElementById('pitchResult');
+    outputEl.style.display = 'block';
+    resultEl.textContent = '';
+    resultEl.parentElement.classList.add('llm-loading');
+    const result = await AI.generatePitchLLM(role, achievement);
+    resultEl.textContent = result;
+    resultEl.parentElement.classList.remove('llm-loading');
   },
-  negotiationScript() {
-    const result = AI.negotiationScript(
+  async negotiationScript() {
+    const resultEl = document.getElementById('negResult');
+    const outputEl = document.getElementById('negOutput');
+    outputEl.style.display = 'block';
+    resultEl.textContent = '';
+    resultEl.parentElement.classList.add('llm-loading');
+    const result = await AI.negotiationScriptLLM(
       document.getElementById('negCurrentSalary').value,
       document.getElementById('negDesiredSalary').value,
       document.getElementById('negReason').value
     );
-    document.getElementById('negResult').textContent = result;
-    document.getElementById('negOutput').style.display = 'block';
+    resultEl.textContent = result;
+    resultEl.parentElement.classList.remove('llm-loading');
   },
   nextLesson() {
     const lessons = AI.leadershipLessons;
@@ -1041,15 +1159,25 @@ const Leadership = {
 
 // ==================== BRANDING ====================
 const Branding = {
-  optimizeLinkedIn() {
-    const result = AI.linkedinHeadlines(document.getElementById('linkedinRole').value, document.getElementById('linkedinSkills').value);
-    document.getElementById('linkedinResult').textContent = result;
-    document.getElementById('linkedinOutput').style.display = 'block';
+  async optimizeLinkedIn() {
+    const resultEl = document.getElementById('linkedinResult');
+    const outputEl = document.getElementById('linkedinOutput');
+    outputEl.style.display = 'block';
+    resultEl.textContent = '';
+    resultEl.parentElement.classList.add('llm-loading');
+    const result = await AI.linkedinHeadlinesLLM(document.getElementById('linkedinRole').value, document.getElementById('linkedinSkills').value);
+    resultEl.textContent = result;
+    resultEl.parentElement.classList.remove('llm-loading');
   },
-  generatePost() {
-    const result = AI.socialPost(document.getElementById('postTopic').value, document.getElementById('postPlatform').value);
-    document.getElementById('postResult').textContent = result;
-    document.getElementById('postOutput').style.display = 'block';
+  async generatePost() {
+    const resultEl = document.getElementById('postResult');
+    const outputEl = document.getElementById('postOutput');
+    outputEl.style.display = 'block';
+    resultEl.textContent = '';
+    resultEl.parentElement.classList.add('llm-loading');
+    const result = await AI.socialPostLLM(document.getElementById('postTopic').value, document.getElementById('postPlatform').value);
+    resultEl.textContent = result;
+    resultEl.parentElement.classList.remove('llm-loading');
   },
   openAddWin() {
     Modal.open('Log a Win', `
@@ -1194,7 +1322,7 @@ const Wellness = {
 
 // ==================== AI CHAT ====================
 const AIChat = {
-  send() {
+  async send() {
     const input = document.getElementById('chatInput');
     const msg = input.value.trim();
     if (!msg) return;
@@ -1202,46 +1330,26 @@ const AIChat = {
 
     const container = document.getElementById('chatMessages');
     container.innerHTML += `<div class="chat-msg user"><div class="cm-avatar">👩</div><div class="cm-bubble"><div class="cm-text">${esc(msg)}</div></div></div>`;
-
-    const apiKey = S.settings.apiKey;
-    const provider = S.settings.apiProvider;
-
-    if (apiKey && provider !== 'builtin') {
-      this.callAPI(msg, container);
-    } else {
-      const response = AI.chat(msg);
-      setTimeout(() => {
-        container.innerHTML += `<div class="chat-msg ai"><div class="cm-avatar">🧠</div><div class="cm-bubble"><div class="cm-text">${response.replace(/\n/g, '<br>')}</div></div></div>`;
-        container.scrollTop = container.scrollHeight;
-      }, 500);
-    }
     container.scrollTop = container.scrollHeight;
-  },
 
-  async callAPI(msg, container) {
-    const provider = S.settings.apiProvider;
-    let url, headers, body;
-
-    const systemPrompt = `You are HER-OS, an AI Life Operating System for women. You help with productivity, scheduling, finance, wellness, learning, home management, leadership, and personal branding. Be warm, supportive, and actionable. Use emojis naturally. Keep responses concise but helpful. The user's data: Energy: ${S.user.energy}, Pending tasks: ${S.tasks.filter(t=>!t.done).length}, Budget remaining: ₹${S.finance.income - S.expenses.reduce((s,e)=>s+e.amount,0)}.`;
-
-    if (provider === 'groq') {
-      url = 'https://api.groq.com/openai/v1/chat/completions';
-      headers = { 'Authorization': 'Bearer ' + S.settings.apiKey, 'Content-Type': 'application/json' };
-      body = JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: msg }], max_tokens: 500 });
-    } else {
-      url = 'https://api.openai.com/v1/chat/completions';
-      headers = { 'Authorization': 'Bearer ' + S.settings.apiKey, 'Content-Type': 'application/json' };
-      body = JSON.stringify({ model: 'gpt-3.5-turbo', messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: msg }], max_tokens: 500 });
-    }
+    const thinkingId = 'thinking-' + Date.now();
+    container.innerHTML += `<div class="chat-msg ai" id="${thinkingId}"><div class="cm-avatar">🧠</div><div class="cm-bubble"><div class="cm-text typing-indicator"><span></span><span></span><span></span></div></div></div>`;
+    container.scrollTop = container.scrollHeight;
 
     try {
-      const res = await fetch(url, { method: 'POST', headers, body });
-      const data = await res.json();
-      const text = data.choices?.[0]?.message?.content || 'Sorry, I couldn\'t process that. Try again!';
-      container.innerHTML += `<div class="chat-msg ai"><div class="cm-avatar">🧠</div><div class="cm-bubble"><div class="cm-text">${esc(text).replace(/\n/g, '<br>')}</div></div></div>`;
+      const response = await AI.chatLLM(msg);
+      const thinkingEl = document.getElementById(thinkingId);
+      if (thinkingEl) {
+        thinkingEl.querySelector('.cm-text').innerHTML = response.replace(/\n/g, '<br>');
+        thinkingEl.querySelector('.cm-text').classList.remove('typing-indicator');
+      }
     } catch (e) {
       const fallback = AI.chat(msg);
-      container.innerHTML += `<div class="chat-msg ai"><div class="cm-avatar">🧠</div><div class="cm-bubble"><div class="cm-text">${fallback.replace(/\n/g, '<br>')}</div></div></div>`;
+      const thinkingEl = document.getElementById(thinkingId);
+      if (thinkingEl) {
+        thinkingEl.querySelector('.cm-text').innerHTML = fallback.replace(/\n/g, '<br>');
+        thinkingEl.querySelector('.cm-text').classList.remove('typing-indicator');
+      }
     }
     container.scrollTop = container.scrollHeight;
   }
@@ -1267,13 +1375,13 @@ const Settings = {
     const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'heros-data.json';
+    a.download = 'herai-data.json';
     a.click();
     toast('📥 Data exported!', 'success');
   },
   clearData() {
     if (confirm('Are you sure? This will delete all your data.')) {
-      localStorage.removeItem('heros_data');
+      localStorage.removeItem('herai_data');
       location.reload();
     }
   },

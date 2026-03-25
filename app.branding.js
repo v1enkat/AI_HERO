@@ -1,13 +1,33 @@
 const Branding = {
-  optimizeLinkedIn() {
-    const result = AI.linkedinHeadlines(document.getElementById('linkedinRole').value, document.getElementById('linkedinSkills').value);
-    document.getElementById('linkedinResult').textContent = result;
-    document.getElementById('linkedinOutput').style.display = 'block';
+  async optimizeLinkedIn() {
+    const resultEl = document.getElementById('linkedinResult');
+    const outputEl = document.getElementById('linkedinOutput');
+
+    outputEl.style.display = 'block';
+    resultEl.textContent = '';
+    resultEl.parentElement.classList.add('llm-loading');
+
+    const result = await AI.linkedinHeadlinesLLM(
+      document.getElementById('linkedinRole').value,
+      document.getElementById('linkedinSkills').value
+    );
+    resultEl.textContent = result;
+    resultEl.parentElement.classList.remove('llm-loading');
   },
-  generatePost() {
-    const result = AI.socialPost(document.getElementById('postTopic').value, document.getElementById('postPlatform').value);
-    document.getElementById('postResult').textContent = result;
-    document.getElementById('postOutput').style.display = 'block';
+  async generatePost() {
+    const resultEl = document.getElementById('postResult');
+    const outputEl = document.getElementById('postOutput');
+
+    outputEl.style.display = 'block';
+    resultEl.textContent = '';
+    resultEl.parentElement.classList.add('llm-loading');
+
+    const result = await AI.socialPostLLM(
+      document.getElementById('postTopic').value,
+      document.getElementById('postPlatform').value
+    );
+    resultEl.textContent = result;
+    resultEl.parentElement.classList.remove('llm-loading');
   },
   openAddWin() {
     Modal.open('Log a Win', `

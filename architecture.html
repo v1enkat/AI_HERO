@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI HER-OS — Architecture Explained</title>
+<title>AI HER-AI — Architecture Explained</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -86,6 +86,7 @@ h1 {
   margin-bottom: 8px;
   background: linear-gradient(135deg, var(--coral), var(--lavender), var(--teal));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 .subtitle {
@@ -362,7 +363,7 @@ h1 {
 <body>
 
 <nav class="arch-navbar">
-  <a href="index.html" class="nav-logo">HER<span class="accent">-OS</span></a>
+  <a href="index.html" class="nav-logo">HER<span class="accent">-AI</span></a>
   <ul class="arch-nav-links">
     <li><a href="index.html">Home</a></li>
     <li><a href="app.html" class="nav-cta">Launch App ✦</a></li>
@@ -371,7 +372,7 @@ h1 {
 
 <div class="container">
 
-  <h1>How AI is Merged with HER-OS</h1>
+  <h1>How AI is Merged with HER-AI</h1>
   <p class="subtitle">Complete Architecture &mdash; How every piece connects</p>
 
   <!-- ========== ARCHITECTURE DIAGRAM ========== -->
@@ -471,17 +472,25 @@ h1 {
     </div>
 
     <!-- LAYER 5: EXTERNAL API -->
-    <div class="arch-layer" style="border-style: dashed; border-color: rgba(126,189,214,0.3);">
-      <div class="layer-badge badge-api">Layer 5 &mdash; External LLM (Optional)</div>
-      <div class="layer-title">Groq (Llama 3.3 70B) / OpenAI (GPT-3.5)</div>
+    <div class="arch-layer" style="border-color: rgba(126,189,214,0.3);">
+      <div class="layer-badge badge-api">Layer 5 &mdash; Groq LLM (Hybrid AI)</div>
+      <div class="layer-title">Groq API &mdash; LLaMA 3.3 70B via config.js</div>
       <div class="ai-engine-box">
         <div class="ai-fn" style="border-color: rgba(126,189,214,0.2); background: rgba(126,189,214,0.06);">
-          <div class="ai-fn-name" style="color: var(--blue)"><span class="ai-fn-arrow">&rarr;</span>AIChat.callAPI()</div>
-          <div class="ai-fn-desc">Sends user message + system prompt + user context to external LLM via REST API</div>
+          <div class="ai-fn-name" style="color: var(--blue)"><span class="ai-fn-arrow">&rarr;</span>AI.callLLM()</div>
+          <div class="ai-fn-desc">Central function &mdash; sends system prompt + user message to Groq API. Falls back to rule-based AI on failure.</div>
         </div>
         <div class="ai-fn" style="border-color: rgba(126,189,214,0.2); background: rgba(126,189,214,0.06);">
-          <div class="ai-fn-name" style="color: var(--blue)"><span class="ai-fn-arrow">&rarr;</span>System Prompt</div>
-          <div class="ai-fn-desc">Feeds user's energy, tasks, budget, mood data into the LLM so it responds as HER-OS, personalized to her</div>
+          <div class="ai-fn-name" style="color: var(--blue)"><span class="ai-fn-arrow">&rarr;</span>config.js (API Key)</div>
+          <div class="ai-fn-desc">Developer sets Groq API key once in config.js. Gitignored for security. Settings page override available.</div>
+        </div>
+        <div class="ai-fn" style="border-color: rgba(126,189,214,0.2); background: rgba(126,189,214,0.06);">
+          <div class="ai-fn-name" style="color: var(--blue)"><span class="ai-fn-arrow">&rarr;</span>LLM Wrappers</div>
+          <div class="ai-fn-desc">chatLLM(), rewriteEmailLLM(), generatePitchLLM(), socialPostLLM(), instructorChatLLM() &mdash; every feature uses LLM</div>
+        </div>
+        <div class="ai-fn" style="border-color: rgba(126,189,214,0.2); background: rgba(126,189,214,0.06);">
+          <div class="ai-fn-name" style="color: var(--blue)"><span class="ai-fn-arrow">&rarr;</span>Graceful Degradation</div>
+          <div class="ai-fn-desc">If API fails, network is down, or no key set &rarr; every feature silently falls back to built-in rule-based AI. App never breaks.</div>
         </div>
       </div>
     </div>
@@ -492,20 +501,23 @@ h1 {
   <div class="explain-section">
     <div class="explain-header">
       <span class="step-num">1</span>
-      <span class="explain-title">The AI Engine Lives Inside app.js</span>
+      <span class="explain-title">The AI Engine &mdash; Hybrid Architecture</span>
     </div>
     <div class="explain-body">
-      <p>The AI is a <span class="highlight">JavaScript object called <code>AI</code></span> defined at line 87 of <code>app.js</code>. It contains 12+ intelligent functions, each designed for a specific purpose. This is not a separate server or external service &mdash; it <span class="highlight-teal">runs directly in the user's browser</span>.</p>
+      <p>The AI is a <span class="highlight">JavaScript object called <code>AI</code></span> defined in <code>app.ai-engine.js</code>. It contains 12+ rule-based functions <strong>plus</strong> LLM-powered wrappers that call Groq's LLaMA 3.3 70B model. The rule-based engine <span class="highlight-teal">runs directly in the browser</span> (offline-capable), while the LLM layer adds human-like conversational quality when connected.</p>
       <div class="code-block">
-<span class="cmt">// app.js line 86-87</span>
+<span class="cmt">// app.ai-engine.js — Hybrid AI (Rule-Based + LLM)</span>
 <span class="kw">const</span> <span class="var">AI</span> = {
-  <span class="fn">getGreeting</span>()    { ... },  <span class="cmt">// time-aware greetings</span>
-  <span class="fn">getEnergyTip</span>()  { ... },  <span class="cmt">// energy-based productivity advice</span>
-  <span class="fn">getDashInsight</span>(){ ... },  <span class="cmt">// reads ALL user data → generates insight</span>
-  <span class="fn">getCyclePhase</span>() { ... },  <span class="cmt">// cycle-aware recommendations</span>
-  <span class="fn">chat</span>(msg)       { ... },  <span class="cmt">// full conversational AI</span>
-  <span class="fn">instructorChat</span>(){ ... },  <span class="cmt">// personalized learning AI</span>
-  ...
+  <span class="cmt">// Rule-based functions (work offline)</span>
+  <span class="fn">chat</span>(msg)          { ... },  <span class="cmt">// keyword-based conversational AI</span>
+  <span class="fn">rewriteEmail</span>()     { ... },  <span class="cmt">// pattern-based email rewriting</span>
+  <span class="fn">instructorChat</span>()   { ... },  <span class="cmt">// structured 4-week course content</span>
+
+  <span class="cmt">// LLM-powered wrappers (call Groq API, fallback to above)</span>
+  <span class="fn">chatLLM</span>(msg)       { ... },  <span class="cmt">// human-like chat via LLM</span>
+  <span class="fn">rewriteEmailLLM</span>() { ... },  <span class="cmt">// natural email rewriting via LLM</span>
+  <span class="fn">instructorChatLLM</span>(){ ... },  <span class="cmt">// conversational tutor via LLM</span>
+  <span class="fn">callLLM</span>()          { ... },  <span class="cmt">// central Groq API caller</span>
 };
       </div>
     </div>
@@ -578,33 +590,45 @@ h1 {
   <div class="explain-section">
     <div class="explain-header">
       <span class="step-num">4</span>
-      <span class="explain-title">AI Chat — The Conversational Interface</span>
+      <span class="explain-title">Hybrid AI — LLM with Offline Fallback</span>
     </div>
     <div class="explain-body">
-      <p>The <span class="highlight">AI Chat module</span> acts as the central conversational hub. When a user types a message, it flows through a <span class="highlight-teal">two-path system</span>:</p>
+      <p>Every AI feature uses a <span class="highlight">Hybrid Architecture</span>: it first tries the Groq LLM for human-like responses, then <span class="highlight-teal">gracefully falls back</span> to the built-in rule-based engine if the API is unavailable:</p>
       <div class="data-flow">
-        <div class="df-box df-user">User types message</div>
+        <div class="df-box df-user">User action</div>
         <span class="df-arrow">&rarr;</span>
-        <div class="df-box df-module">AIChat.send()</div>
+        <div class="df-box df-module">AI.chatLLM(msg)</div>
         <span class="df-arrow">&rarr;</span>
-        <div class="df-box df-ai" style="border-style: solid;">Path A: AI.chat(msg)<br><small>Built-in engine</small></div>
+        <div class="df-box" style="background: rgba(126,189,214,0.15); border: 1px solid var(--blue); color: var(--blue);">Groq API (LLaMA 3.3 70B)</div>
       </div>
       <div class="data-flow" style="margin-top: 6px;">
-        <div class="df-box df-user" style="visibility: hidden;">User types</div>
+        <div class="df-box df-user" style="visibility: hidden;">User</div>
         <span class="df-arrow" style="visibility: hidden;">&rarr;</span>
-        <div class="df-box df-module" style="visibility: hidden;">send()</div>
+        <div class="df-box df-module" style="visibility: hidden;">call</div>
         <span class="df-arrow">&rarr;</span>
-        <div class="df-box" style="background: rgba(126,189,214,0.15); border: 1px solid var(--blue); color: var(--blue);">Path B: AIChat.callAPI()<br><small>External LLM</small></div>
+        <div class="df-box df-ai">If API fails &rarr; AI.chat(msg)<br><small>Built-in rule engine (offline)</small></div>
       </div>
       <div class="code-block">
-<span class="cmt">// AIChat.send() — The decision point (line 1209)</span>
-<span class="kw">if</span> (apiKey && provider !== <span class="str">'builtin'</span>) {
-  this.<span class="fn">callAPI</span>(msg, container);     <span class="cmt">// → external LLM (Groq/OpenAI)</span>
-} <span class="kw">else</span> {
-  <span class="kw">const</span> response = <span class="var">AI</span>.<span class="fn">chat</span>(msg);   <span class="cmt">// → built-in AI engine</span>
+<span class="cmt">// AI.callLLM() — Central hybrid function</span>
+<span class="kw">async</span> <span class="fn">callLLM</span>(systemPrompt, messages, fallbackFn) {
+  <span class="kw">const</span> apiKey = this.<span class="fn">_getApiKey</span>();  <span class="cmt">// config.js → Settings override</span>
+  <span class="kw">if</span> (!apiKey) <span class="kw">return</span> <span class="fn">fallbackFn</span>();   <span class="cmt">// no key? → rule-based AI</span>
+  <span class="kw">try</span> {
+    <span class="kw">const</span> res = <span class="kw">await</span> fetch(<span class="str">'https://api.groq.com/...'</span>, { ... });
+    <span class="kw">return</span> data.choices[0].message.content;  <span class="cmt">// LLM response</span>
+  } <span class="kw">catch</span> (e) {
+    <span class="kw">return</span> <span class="fn">fallbackFn</span>();  <span class="cmt">// network error → rule-based AI</span>
+  }
 }
+
+<span class="cmt">// Every feature uses the same pattern:</span>
+<span class="fn">chatLLM</span>(msg)           → calls callLLM() → fallback: <span class="fn">chat</span>(msg)
+<span class="fn">rewriteEmailLLM</span>(t,s)  → calls callLLM() → fallback: <span class="fn">rewriteEmail</span>(t,s)
+<span class="fn">instructorChatLLM</span>(m)  → calls callLLM() → fallback: <span class="fn">instructorChat</span>(m)
+<span class="fn">generatePitchLLM</span>(r)   → calls callLLM() → fallback: <span class="fn">generatePitch</span>(r)
+<span class="fn">socialPostLLM</span>(t,p)    → calls callLLM() → fallback: <span class="fn">socialPost</span>(t,p)
       </div>
-      <p><span class="highlight">AI.chat()</span> understands 12+ categories: tasks, schedule, budget, mood, cycle, groceries, learning, motivation, help, and more. It analyzes the message keywords and responds with data-driven answers.</p>
+      <p><span class="highlight-gold">This means the app works in 3 modes:</span> (1) Full LLM with API key &mdash; human-like responses, (2) No API key &mdash; rule-based AI still works, (3) Offline/API down &mdash; automatic fallback to rule-based. <strong>The app never breaks.</strong></p>
     </div>
   </div>
 
@@ -640,39 +664,36 @@ h1 {
   <div class="explain-section">
     <div class="explain-header">
       <span class="step-num">6</span>
-      <span class="explain-title">External LLM Integration (The Upgrade Path)</span>
+      <span class="explain-title">Config-Based LLM &mdash; Secure API Key Management</span>
     </div>
     <div class="explain-body">
-      <p>When a user adds an <span class="highlight">API key in Settings</span>, the AI Chat automatically upgrades from built-in to external LLM. The <span class="highlight-teal">system prompt feeds all user data</span> into the LLM:</p>
+      <p>The Groq API key is stored in <span class="highlight">config.js</span> &mdash; a separate file that is <span class="highlight-teal">.gitignored</span> (never committed to version control). The developer sets it once before deploying. A <code>config.example.js</code> template ships with the project.</p>
       <div class="code-block">
-<span class="cmt">// The system prompt makes the LLM "become" HER-OS (line 1225)</span>
-<span class="kw">const</span> <span class="var">systemPrompt</span> = <span class="str">`You are HER-OS, an AI Life Operating System for women.
-  You help with productivity, scheduling, finance, wellness, learning,
-  home management, leadership, and personal branding.
+<span class="cmt">// config.js (gitignored &mdash; developer fills this once)</span>
+<span class="kw">const</span> <span class="var">CONFIG</span> = {
+  GROQ_API_KEY: <span class="str">'gsk_your_key_here'</span>,
+  GROQ_MODEL: <span class="str">'llama-3.3-70b-versatile'</span>
+};
 
-  The user's data:
-    Energy: ${<span class="var">S</span>.user.energy}
-    Pending tasks: ${<span class="var">S</span>.tasks.filter(t => !t.done).length}
-    Budget remaining: ₹${remaining}
-  `</span>;
-
-<span class="cmt">// Sent to Groq or OpenAI API</span>
-fetch(url, {
-  body: JSON.stringify({
-    model: <span class="str">'llama-3.3-70b-versatile'</span>,
-    messages: [
-      { role: <span class="str">'system'</span>, content: systemPrompt },
-      { role: <span class="str">'user'</span>, content: userMessage }
-    ]
-  })
-});
-      </div>
-      <p><span class="highlight-gold">Fallback safety:</span> If the API call fails, the system automatically falls back to the built-in AI engine, so the user is never left without a response.</p>
-      <div class="code-block">
-<span class="cmt">// Graceful fallback (line 1242-1244)</span>
-<span class="kw">catch</span> (e) {
-  <span class="kw">const</span> fallback = <span class="var">AI</span>.<span class="fn">chat</span>(msg);  <span class="cmt">// built-in AI takes over</span>
+<span class="cmt">// API key lookup chain (app.ai-engine.js)</span>
+<span class="fn">_getApiKey</span>() {
+  <span class="kw">return</span> CONFIG.GROQ_API_KEY   <span class="cmt">// 1st: config.js</span>
+      || S.settings.apiKey      <span class="cmt">// 2nd: Settings page override</span>
+      || <span class="str">''</span>;                    <span class="cmt">// 3rd: empty → use rule-based AI</span>
 }
+      </div>
+      <p><span class="highlight-gold">Each feature has a tailored system prompt</span> that feeds user context (energy, tasks, budget, cycle phase, moods) into the LLM, making every response personalized:</p>
+      <div class="code-block">
+<span class="cmt">// Each feature sends different system prompts:</span>
+Chat     → <span class="str">"You are HER-AI, a warm life coach for women..."</span>
+Email    → <span class="str">"You are a communication coach. Rewrite in {tone} tone..."</span>
+Pitch    → <span class="str">"You are a career branding expert..."</span>
+Tutor    → <span class="str">"You are a patient tutor. Make this lesson conversational..."</span>
+LinkedIn → <span class="str">"You are a LinkedIn branding specialist..."</span>
+
+<span class="cmt">// User context injected automatically:</span>
+<span class="str">"Name: ${name}, Energy: ${energy}, Tasks: ${pending},
+ Budget: ₹${income}/₹${spent}, Cycle: ${phase}"</span>
       </div>
     </div>
   </div>
@@ -686,16 +707,16 @@ fetch(url, {
     <div class="explain-body">
       <table class="summary-table">
         <tr><th>Component</th><th>File</th><th>Role</th></tr>
-        <tr><td><span class="highlight">AI Object</span></td><td>app.js (line 87)</td><td>Central brain — 12+ intelligent functions</td></tr>
-        <tr><td><span class="highlight-gold">State (S)</span></td><td>app.js (line 6)</td><td>Stores all user data — AI reads this for personalization</td></tr>
-        <tr><td><span class="highlight-teal">8 Modules</span></td><td>app.js (lines 403-1190)</td><td>Each module calls AI functions when rendering</td></tr>
-        <tr><td style="color: var(--blue); font-weight: 600;">AIChat.callAPI()</td><td>app.js (line 1221)</td><td>Optional external LLM connection with fallback</td></tr>
-        <tr><td style="color: var(--lavender); font-weight: 600;">localStorage</td><td>app.js (line 28)</td><td>Persists data so AI remembers user across sessions</td></tr>
-        <tr><td><span class="highlight">UI (app.html)</span></td><td>app.html</td><td>All buttons/inputs trigger module functions → AI responds</td></tr>
-        <tr><td><span class="highlight-gold">Styles (app.css)</span></td><td>app.css</td><td>Visual layer — displays AI responses beautifully</td></tr>
+        <tr><td><span class="highlight">AI Engine</span></td><td>app.ai-engine.js</td><td>Hybrid brain &mdash; 12+ rule-based functions + LLM wrappers</td></tr>
+        <tr><td><span class="highlight-gold">State (S)</span></td><td>app.state.js</td><td>Stores all user data + chat history &mdash; AI reads this for personalization</td></tr>
+        <tr><td><span class="highlight-teal">8 Modules</span></td><td>app.*.js (16 files)</td><td>Each module calls AI LLM functions with async/await</td></tr>
+        <tr><td style="color: var(--blue); font-weight: 600;">AI.callLLM()</td><td>app.ai-engine.js</td><td>Central Groq API caller &mdash; every feature routes through this</td></tr>
+        <tr><td style="color: var(--blue); font-weight: 600;">config.js</td><td>config.js (.gitignored)</td><td>Groq API key &mdash; set once by developer, never committed</td></tr>
+        <tr><td style="color: var(--lavender); font-weight: 600;">localStorage</td><td>app.state.js</td><td>Persists data + chat history so AI remembers user across sessions</td></tr>
+        <tr><td><span class="highlight">UI (app.html)</span></td><td>app.html + app.css</td><td>Typing indicators, loading states, buttons &rarr; AI responds</td></tr>
       </table>
       <p style="margin-top: 16px; text-align: center; color: var(--coral); font-weight: 600; font-size: 1rem;">
-        The AI is not a separate service. It is <em>woven into every single feature</em> of the application.
+        Hybrid AI: LLM for human-like quality when online &mdash; built-in rule engine for instant offline responses. The app <em>never breaks</em>.
       </p>
     </div>
   </div>

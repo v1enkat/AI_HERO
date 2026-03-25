@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI HER-OS — Project Presentation</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --plum: #6B2D5B;
+  --plum-deep: #4A1942;
+  --rose: #E8526F;
+  --gold: #D4A853;
+  --teal: #7ECEC1;
+  --lavender: #C5A3CF;
+  --blue: #7EB5D6;
+  --cream: #FFF8F0;
+  --night: #0a0a0f;
+  --text: #e8e6e3;
+  --muted: #8a8a9a;
+  --surface: #12121a;
+  --border: #1e1e2e;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; background: var(--night); }
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 80px;
+  opacity: 0;
+  transform: translateX(60px);
+  transition: opacity 0.5s, transform 0.5s;
+  pointer-events: none;
+}
+.slide.active {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: all;
+}
+
+.slide-num {
+  position: fixed;
+  bottom: 24px;
+  right: 40px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  color: var(--muted);
+  z-index: 100;
+}
+
+.nav-controls {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 100;
+}
+.nav-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  transition: all 0.3s;
+}
+.nav-btn:hover { background: rgba(232,82,111,0.2); border-color: var(--rose); }
+
+.slide-logo {
+  position: fixed;
+  top: 24px;
+  left: 40px;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  color: var(--text);
+  z-index: 100;
+}
+.slide-logo .acc { color: var(--gold); }
+
+/* ===== SLIDE 1: TITLE ===== */
+.s1-bg {
+  background: linear-gradient(135deg, var(--plum-deep) 0%, var(--plum) 40%, #8B3A7F 70%, var(--rose) 100%);
+  text-align: center;
+}
+.s1-badge {
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(10px);
+  padding: 6px 22px;
+  border-radius: 30px;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 28px;
+  border: 1px solid rgba(212,168,83,0.3);
+}
+.s1-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 4rem;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.15;
+  margin-bottom: 16px;
+}
+.s1-title .gold { color: var(--gold); }
+.s1-sub {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.3rem;
+  color: rgba(255,255,255,0.75);
+  font-weight: 500;
+  letter-spacing: 1px;
+  margin-bottom: 32px;
+}
+.s1-meta {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.8;
+}
+
+/* ===== SLIDE 2: PROBLEM ===== */
+.s2-bg { background: var(--night); }
+.s2-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+.s2-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--rose);
+  margin-bottom: 12px;
+}
+.s2-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.4rem;
+  color: var(--text);
+}
+.problem-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  max-width: 950px;
+  width: 100%;
+}
+.problem-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  transition: border-color 0.3s;
+}
+.problem-card:hover { border-color: var(--rose); }
+.pc-icon { font-size: 1.6rem; margin-bottom: 10px; }
+.pc-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--rose);
+  margin-bottom: 8px;
+}
+.pc-text {
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.problem-stat {
+  text-align: center;
+  margin-top: 32px;
+  padding: 16px;
+  background: rgba(232,82,111,0.08);
+  border: 1px solid rgba(232,82,111,0.2);
+  border-radius: 12px;
+  max-width: 950px;
+  width: 100%;
+}
+.ps-text {
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.6;
+}
+.ps-text strong { color: var(--rose); }
+
+/* ===== SLIDE 3: SOLUTION ===== */
+.s3-bg { background: var(--night); }
+.solution-wrap {
+  max-width: 1000px;
+  width: 100%;
+}
+.s3-header { text-align: center; margin-bottom: 40px; }
+.s3-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 12px;
+}
+.s3-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.4rem;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.s3-sub {
+  font-size: 1rem;
+  color: var(--muted);
+}
+.theme-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 36px;
+}
+.t-pill {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+  transition: all 0.3s;
+}
+.t-pill:hover { border-color: var(--gold); background: rgba(212,168,83,0.08); }
+.t-pill .tp-icon { margin-right: 6px; }
+.solution-features {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+.sf-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+.sf-card:hover { border-color: var(--teal); }
+.sf-icon { font-size: 1.8rem; margin-bottom: 8px; }
+.sf-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--teal);
+  margin-bottom: 6px;
+}
+.sf-text { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
+
+/* ===== SLIDE 4: TECH ARCHITECTURE ===== */
+.s4-bg { background: var(--night); }
+.arch-wrap { max-width: 1000px; width: 100%; }
+.s4-header { text-align: center; margin-bottom: 36px; }
+.s4-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+.s4-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  color: var(--text);
+}
+.arch-layers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.arch-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ar-label {
+  width: 140px;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: right;
+  flex-shrink: 0;
+}
+.ar-bar {
+  flex: 1;
+  border-radius: 10px;
+  padding: 14px 20px;
+  font-size: 0.82rem;
+  color: var(--text);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.ar-bar span {
+  background: rgba(255,255,255,0.06);
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+}
+.ar-user .ar-label { color: var(--teal); }
+.ar-user .ar-bar { background: rgba(126,206,193,0.08); border: 1px solid rgba(126,206,193,0.2); }
+.ar-module .ar-label { color: var(--gold); }
+.ar-module .ar-bar { background: rgba(212,168,83,0.08); border: 1px solid rgba(212,168,83,0.2); }
+.ar-ai .ar-label { color: var(--rose); }
+.ar-ai .ar-bar { background: rgba(232,82,111,0.08); border: 1px solid rgba(232,82,111,0.2); }
+.ar-data .ar-label { color: var(--lavender); }
+.ar-data .ar-bar { background: rgba(197,163,207,0.08); border: 1px solid rgba(197,163,207,0.2); }
+.ar-llm .ar-label { color: var(--blue); }
+.ar-llm .ar-bar { background: rgba(126,189,214,0.08); border: 1px solid rgba(126,189,214,0.2); }
+
+.arch-arrow {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.7rem;
+  padding: 2px 0;
+  letter-spacing: 2px;
+}
+
+.fallback-box {
+  margin-top: 20px;
+  background: rgba(126,206,193,0.06);
+  border: 1px solid rgba(126,206,193,0.25);
+  border-radius: 12px;
+  padding: 16px 24px;
+  text-align: center;
+}
+.fb-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  color: var(--teal);
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+}
+.fb-text { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+.fb-text strong { color: var(--text); }
+
+/* ===== SLIDE 5: DEMO + CLOSING ===== */
+.s5-bg {
+  background: linear-gradient(135deg, var(--plum-deep) 0%, var(--plum) 50%, var(--rose) 100%);
+  text-align: center;
+}
+.s5-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.8rem;
+  color: #fff;
+  margin-bottom: 20px;
+}
+.s5-title .gold { color: var(--gold); }
+.demo-features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  max-width: 750px;
+  width: 100%;
+  margin-bottom: 36px;
+}
+.demo-item {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 14px 18px;
+  text-align: left;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.9);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.demo-item .di-icon { font-size: 1.2rem; flex-shrink: 0; }
+.s5-cta {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.1rem;
+  color: var(--gold);
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.s5-sub {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.5);
+}
+.s5-tagline {
+  margin-top: 32px;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  color: rgba(255,255,255,0.7);
+  font-style: italic;
+}
+</style>
+</head>
+<body>
+
+<div class="slide-logo">HER<span class="acc">-OS</span></div>
+<div class="slide-num" id="slideNum">1 / 5</div>
+
+<div class="nav-controls">
+  <button class="nav-btn" onclick="prevSlide()">&#8592; Previous</button>
+  <button class="nav-btn" onclick="nextSlide()">Next &#8594;</button>
+</div>
+
+<!-- ==================== SLIDE 1: TITLE ==================== -->
+<div class="slide s1-bg active" id="slide-1">
+  <div class="s1-badge">Final Year Project Presentation</div>
+  <h1 class="s1-title">AI HER<span class="gold">-OS</span></h1>
+  <p class="s1-sub">The AI-Powered Life Operating System for Women</p>
+  <div class="s1-meta">
+    A Hybrid AI Application &mdash; Groq LLM + Rule-Based Intelligence<br>
+    Built with HTML, CSS, JavaScript &mdash; Groq API (LLaMA 3.3 70B)
+  </div>
+</div>
+
+<!-- ==================== SLIDE 2: PROBLEM ==================== -->
+<div class="slide s2-bg" id="slide-2">
+  <div class="s2-header">
+    <div class="s2-label">The Problem</div>
+    <h2 class="s2-title">Women Juggle 8+ Life Dimensions Daily</h2>
+  </div>
+  <div class="problem-grid">
+    <div class="problem-card">
+      <div class="pc-icon">📱</div>
+      <div class="pc-title">App Fatigue</div>
+      <div class="pc-text">Women use 5-8 separate apps daily &mdash; one for tasks, one for budget, one for health, one for learning. No single platform connects them.</div>
+    </div>
+    <div class="problem-card">
+      <div class="pc-icon">🔄</div>
+      <div class="pc-title">No Cycle Awareness</div>
+      <div class="pc-text">Existing productivity tools ignore biological rhythms. Energy, focus, and needs change throughout the menstrual cycle &mdash; no app adapts to this.</div>
+    </div>
+    <div class="problem-card">
+      <div class="pc-icon">⚖️</div>
+      <div class="pc-title">Work-Life Imbalance</div>
+      <div class="pc-text">No tool auto-balances personal tasks around professional workload. Heavy work days pile up personal tasks, causing stress and missed errands.</div>
+    </div>
+    <div class="problem-card">
+      <div class="pc-icon">🤖</div>
+      <div class="pc-title">Generic AI Assistants</div>
+      <div class="pc-text">ChatGPT, Siri, and Alexa are general-purpose. None understand a woman's combined context &mdash; career + home + health + finance + personal growth.</div>
+    </div>
+  </div>
+  <div class="problem-stat">
+    <div class="ps-text"><strong>The core problem:</strong> No existing application provides an integrated, AI-driven, cycle-aware life management system designed specifically for women's multidimensional lives.</div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 3: SOLUTION ==================== -->
+<div class="slide s3-bg" id="slide-3">
+  <div class="solution-wrap">
+    <div class="s3-header">
+      <div class="s3-label">Our Solution</div>
+      <h2 class="s3-title">AI HER-OS &mdash; One Brain. Eight Dimensions.</h2>
+      <p class="s3-sub">A single AI-powered platform that manages all 8 dimensions of a woman's life</p>
+    </div>
+    <div class="theme-pills">
+      <div class="t-pill"><span class="tp-icon">⚡</span> Productivity</div>
+      <div class="t-pill"><span class="tp-icon">📅</span> Smart Scheduler</div>
+      <div class="t-pill"><span class="tp-icon">🎓</span> AI Learning</div>
+      <div class="t-pill"><span class="tp-icon">🏠</span> Home Manager</div>
+      <div class="t-pill"><span class="tp-icon">💰</span> Finance</div>
+      <div class="t-pill"><span class="tp-icon">👑</span> Leadership</div>
+      <div class="t-pill"><span class="tp-icon">✨</span> Branding</div>
+      <div class="t-pill"><span class="tp-icon">💜</span> Wellness</div>
+    </div>
+    <div class="solution-features">
+      <div class="sf-card">
+        <div class="sf-icon">📍</div>
+        <div class="sf-title">Smart Geo-Reminders</div>
+        <div class="sf-text">Location-aware reminders that alert you when near relevant stores with your pending shopping list</div>
+      </div>
+      <div class="sf-card">
+        <div class="sf-icon">🧠</div>
+        <div class="sf-title">Hybrid AI Engine</div>
+        <div class="sf-text">Groq LLM (LLaMA 3.3 70B) for human-like responses + built-in rule engine for offline fallback</div>
+      </div>
+      <div class="sf-card">
+        <div class="sf-icon">🌙</div>
+        <div class="sf-title">Cycle-Aware AI</div>
+        <div class="sf-text">Every feature adapts to menstrual cycle phase &mdash; scheduling, energy tips, wellness, task prioritization</div>
+      </div>
+      <div class="sf-card">
+        <div class="sf-icon">⚡</div>
+        <div class="sf-title">Work-Aware Planning</div>
+        <div class="sf-text">AI detects heavy workdays and auto-shifts personal tasks to lighter days. Your life auto-balances.</div>
+      </div>
+      <div class="sf-card">
+        <div class="sf-icon">🎓</div>
+        <div class="sf-title">AI Instructor</div>
+        <div class="sf-text">4-week structured courses with lessons, practice tasks, quizzes &mdash; tutor adapts to your learning style</div>
+      </div>
+      <div class="sf-card">
+        <div class="sf-icon">👑</div>
+        <div class="sf-title">Leadership Toolkit</div>
+        <div class="sf-text">AI rewrites emails confidently, generates elevator pitches, creates negotiation scripts for women</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 4: TECH ARCHITECTURE ==================== -->
+<div class="slide s4-bg" id="slide-4">
+  <div class="arch-wrap">
+    <div class="s4-header">
+      <div class="s4-label">Technical Architecture</div>
+      <h2 class="s4-title">Hybrid AI &mdash; LLM + Rule-Based Fallback</h2>
+    </div>
+    <div class="arch-layers">
+      <div class="arch-row ar-user">
+        <div class="ar-label">UI Layer</div>
+        <div class="ar-bar"><span>Dashboard</span><span>AI Chat</span><span>Scheduler</span><span>Finance</span><span>Home</span><span>Learning</span><span>Wellness</span><span>Leadership</span><span>Branding</span></div>
+      </div>
+      <div class="arch-arrow">&#9660;</div>
+      <div class="arch-row ar-module">
+        <div class="ar-label">Module Logic</div>
+        <div class="ar-bar"><span>app.productivity.js</span><span>app.learning.js</span><span>app.finance.js</span><span>app.leadership.js</span><span>+ 12 more modules</span></div>
+      </div>
+      <div class="arch-arrow">&#9660;</div>
+      <div class="arch-row ar-ai">
+        <div class="ar-label">AI Engine</div>
+        <div class="ar-bar"><span>Rule-Based AI (12+ functions)</span><span>LLM Wrappers (chatLLM, rewriteEmailLLM, instructorChatLLM...)</span><span>callLLM() &mdash; central API caller</span></div>
+      </div>
+      <div class="arch-arrow">&#9660;</div>
+      <div class="arch-row ar-data">
+        <div class="ar-label">Data Layer</div>
+        <div class="ar-bar"><span>State Object (S)</span><span>localStorage</span><span>Chat History</span><span>Tasks, Expenses, Moods, Cycle, Skills, Events</span></div>
+      </div>
+      <div class="arch-arrow">&#9660;</div>
+      <div class="arch-row ar-llm">
+        <div class="ar-label">External API</div>
+        <div class="ar-bar"><span>Groq API</span><span>LLaMA 3.3 70B</span><span>config.js (API key, .gitignored)</span><span>REST API via fetch()</span></div>
+      </div>
+    </div>
+    <div class="fallback-box">
+      <div class="fb-title">Graceful Degradation &mdash; The App Never Breaks</div>
+      <div class="fb-text">
+        <strong>With API Key:</strong> LLM powers all features with human-like responses &nbsp;|&nbsp;
+        <strong>Without Key / Offline:</strong> Built-in rule-based AI handles everything instantly &nbsp;|&nbsp;
+        <strong>API Failure:</strong> Silent automatic fallback &mdash; user sees no error
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 5: DEMO + CLOSING ==================== -->
+<div class="slide s5-bg" id="slide-5">
+  <h2 class="s5-title">Live Demo &mdash; AI HER<span class="gold">-OS</span></h2>
+  <div class="demo-features">
+    <div class="demo-item"><span class="di-icon">💬</span> AI Chat &mdash; conversational like ChatGPT with personal context</div>
+    <div class="demo-item"><span class="di-icon">📧</span> Email Rewrite &mdash; paste draft, pick tone, get confident version</div>
+    <div class="demo-item"><span class="di-icon">🎓</span> AI Instructor &mdash; type "Excel" and navigate week-by-week lessons</div>
+    <div class="demo-item"><span class="di-icon">📍</span> Geo-Reminders &mdash; add store + items, test proximity popup</div>
+    <div class="demo-item"><span class="di-icon">📅</span> Smart Scheduler &mdash; AI auto-plans tasks by priority + energy</div>
+    <div class="demo-item"><span class="di-icon">🌙</span> Cycle Awareness &mdash; set dates, see how all features adapt</div>
+  </div>
+  <div class="s5-cta">The First AI Life Operating System for Women</div>
+  <div class="s5-sub">8 Themes &bull; Hybrid AI (LLM + Rule Engine) &bull; Cycle-Aware &bull; Offline-Capable &bull; Privacy-First</div>
+  <div class="s5-tagline">"She doesn't need more apps. She needs one system that understands her."</div>
+</div>
+
+<script>
+let current = 1;
+const total = 5;
+
+function showSlide(n) {
+  document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+  document.getElementById('slide-' + n).classList.add('active');
+  document.getElementById('slideNum').textContent = n + ' / ' + total;
+}
+
+function nextSlide() { if (current < total) { current++; showSlide(current); } }
+function prevSlide() { if (current > 1) { current--; showSlide(current); } }
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+});
+</script>
+
+</body>
+</html>

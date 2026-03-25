@@ -17,13 +17,13 @@ const Settings = {
     const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'heros-data.json';
+    a.download = 'herai-data.json';
     a.click();
     toast('📥 Data exported!', 'success');
   },
   clearData() {
     if (confirm('Are you sure? This will delete all your data.')) {
-      localStorage.removeItem('heros_data');
+      localStorage.removeItem('herai_data');
       location.reload();
     }
   },

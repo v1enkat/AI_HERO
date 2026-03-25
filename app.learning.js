@@ -16,7 +16,7 @@ const Learning = {
     this.render();
     toast('🎓 Skill added! Start learning with AI Instructor below.', 'success');
   },
-  sendMsg() {
+  async sendMsg() {
     const input = document.getElementById('instructorInput');
     const msg = input.value.trim();
     if (!msg) return;
@@ -25,11 +25,20 @@ const Learning = {
     const container = document.getElementById('instructorMessages');
     container.innerHTML += `<div class="ic-msg user">${esc(msg)}</div>`;
 
-    const response = AI.instructorChat(msg, S.user.learningStyle);
-    setTimeout(() => {
-      container.innerHTML += `<div class="ic-msg ai"><span class="ic-label">AI Instructor</span>${response.replace(/\n/g, '<br>')}</div>`;
-      container.scrollTop = container.scrollHeight;
-    }, 600);
+    const thinkingId = 'inst-thinking-' + Date.now();
+    container.innerHTML += `<div class="ic-msg ai" id="${thinkingId}"><span class="ic-label">AI Instructor</span><span class="typing-indicator"><span></span><span></span><span></span></span></div>`;
+    container.scrollTop = container.scrollHeight;
+
+    try {
+      const response = await AI.instructorChatLLM(msg, S.user.learningStyle);
+      const el = document.getElementById(thinkingId);
+      if (el) el.innerHTML = `<span class="ic-label">AI Instructor</span>${response.replace(/\n/g, '<br>')}`;
+    } catch (e) {
+      const fallback = AI.instructorChat(msg, S.user.learningStyle);
+      const el = document.getElementById(thinkingId);
+      if (el) el.innerHTML = `<span class="ic-label">AI Instructor</span>${fallback.replace(/\n/g, '<br>')}`;
+    }
+    container.scrollTop = container.scrollHeight;
 
     if (S.skills.length > 0) {
       S.skills[0].minutes += 10;
