@@ -352,11 +352,32 @@ h1 {
 }
 .summary-table tr:hover td { background: rgba(255,255,255,0.02); }
 
-@media (max-width: 700px) {
+@media (max-width: 768px) {
   h1 { font-size: 1.8rem; }
   .ai-engine-box { grid-template-columns: 1fr; }
   .module-grid { grid-template-columns: repeat(3, 1fr); }
   .explain-body { margin-left: 0; }
+  .arch-navbar { padding: 10px 16px; }
+  .arch-nav-links { gap: 0.8rem; }
+  .arch-nav-links a { font-size: 0.75rem; }
+  .container { padding: 70px 16px 30px; }
+  .summary-table { font-size: 0.78rem; display: block; overflow-x: auto; }
+  .summary-table th, .summary-table td { padding: 8px 10px; font-size: 0.75rem; white-space: nowrap; }
+  .explain-section { margin-bottom: 28px; }
+}
+
+@media (max-width: 480px) {
+  h1 { font-size: 1.4rem; }
+  .module-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .module-chip { font-size: 0.7rem; padding: 8px; }
+  .arch-navbar .nav-logo { font-size: 1.1rem; }
+  .arch-nav-links { gap: 0.5rem; }
+  .arch-nav-links a { font-size: 0.65rem; }
+  .nav-cta { padding: 4px 12px !important; font-size: 0.65rem !important; }
+  .container { padding: 60px 10px 20px; }
+  .ai-fn { padding: 10px; }
+  .ai-fn h4 { font-size: 0.82rem; }
+  .ai-fn p { font-size: 0.72rem; }
 }
 </style>
 </head>

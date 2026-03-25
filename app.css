@@ -41,6 +41,7 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { overflow-x: hidden; }
+img, video, svg { max-width: 100%; height: auto; }
 body {
   font-family: 'DM Sans', sans-serif;
   background: var(--bg);
@@ -100,6 +101,16 @@ body {
   cursor: pointer;
   display: none;
 }
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 99;
+}
+
+.sidebar-overlay.active { display: block; }
 
 .sidebar-nav {
   flex: 1;
@@ -345,7 +356,7 @@ body {
 /* ========== DASH GRID ========== */
 .dash-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
   gap: 1rem;
 }
 
@@ -1254,7 +1265,7 @@ select {
 /* ========== SETTINGS ========== */
 .settings-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
   gap: 1rem;
 }
 
@@ -1423,6 +1434,15 @@ select {
 @keyframes llmPulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 
 /* ========== RESPONSIVE ========== */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .dash-grid { grid-template-columns: 1fr 1fr; }
+  .dash-card.large { grid-column: span 2; }
+  .page { padding: 1.2rem; }
+}
+
+/* Mobile landscape / small tablet */
 @media (max-width: 768px) {
   .sidebar { transform: translateX(-100%); }
   .sidebar.open { transform: translateX(0); }
@@ -1431,4 +1451,58 @@ select {
   .sidebar-toggle { display: block; }
   .leadership-grid, .branding-grid { grid-template-columns: 1fr; }
   .dash-stats { grid-template-columns: repeat(2, 1fr); }
+  .dash-grid { grid-template-columns: 1fr; }
+  .dash-card.large { grid-column: span 1; }
+  .page { padding: 1rem; }
+  .page-title { font-size: 1.3rem; }
+  .topbar { padding: 0 1rem; }
+  .topbar-greeting { font-size: 0.88rem; }
+  .et-levels { flex-direction: column; }
+  .et-btn { padding: 0.6rem; font-size: 0.82rem; }
+  .task-item { flex-wrap: wrap; gap: 0.5rem; }
+  .ti-body { min-width: 0; flex: 1; }
+  .sched-item { flex-wrap: wrap; }
+  .ai-banner { flex-direction: column; text-align: center; }
+  .chat-container { height: calc(100vh - 200px); }
+  .home-tabs { flex-wrap: wrap; }
+  .htab { font-size: 0.75rem; padding: 0.4rem 0.8rem; }
+  textarea { font-size: 0.85rem; }
+  .modal-content { width: 95%; max-width: 95%; margin: 1rem; padding: 1.2rem; }
+}
+
+/* Mobile portrait */
+@media (max-width: 480px) {
+  .dash-stats { grid-template-columns: 1fr; }
+  .dsc-value { font-size: 1.2rem; }
+  .page-title { font-size: 1.1rem; }
+  .page-sub { font-size: 0.8rem; }
+  .topbar-right { gap: 0.4rem; }
+  .cycle-indicator, .energy-badge { padding: 0.25rem 0.5rem; font-size: 0.65rem; }
+  .topbar-greeting { display: none; }
+  .btn, .btn-primary { font-size: 0.78rem; padding: 0.5rem 0.8rem; }
+  .spending-bar-row { flex-wrap: wrap; }
+  .sb-label { min-width: 60px; font-size: 0.72rem; }
+  .suggestion-item { flex-direction: column; align-items: flex-start; gap: 0.3rem; }
+  .si-icon { font-size: 1.2rem; }
+  .si-text { font-size: 0.8rem; }
+  .dc-header { flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+  .et-suggestion { font-size: 0.78rem; }
+  .energy-match, .energy-defer { font-size: 0.6rem; }
+  .ti-meta { flex-wrap: wrap; gap: 0.3rem; }
+  .ti-priority { font-size: 0.65rem; }
+  .chat-input-area { flex-direction: column; gap: 0.4rem; }
+  .chat-input-area input { font-size: 0.85rem; }
+  .chat-input-area button { width: 100%; }
+  .cm-bubble { max-width: 95%; font-size: 0.83rem; }
+  .geo-reminder-item { flex-wrap: wrap; gap: 0.5rem; }
+  .grocery-item { flex-wrap: wrap; }
+  .well-card { padding: 1rem; }
+  .mood-options { flex-wrap: wrap; justify-content: center; }
+  .mood-btn { font-size: 1.3rem; padding: 0.5rem; }
+  .sched-item { padding: 0.6rem 0; }
+  .sched-time { font-size: 0.75rem; min-width: 40px; }
+  .sched-title { font-size: 0.82rem; }
+  .workload-bar { height: 6px; }
+  .meal-day h4 { font-size: 0.9rem; }
+  .meal-item { font-size: 0.8rem; }
 }

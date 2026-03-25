@@ -1440,20 +1440,30 @@ function dateStr(d) { return new Date(d).toLocaleDateString('en-US', { month: 's
 document.addEventListener('DOMContentLoaded', function() {
   S.load();
 
-  // Navigation
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+
   document.querySelectorAll('.nav-item').forEach(n => {
     n.addEventListener('click', function(e) {
       e.preventDefault();
       const page = this.dataset.page;
       if (page) Router.go(page);
-      document.getElementById('sidebar').classList.remove('open');
+      sidebar.classList.remove('open');
+      if (overlay) overlay.classList.remove('active');
     });
   });
 
-  // Mobile menu
   document.getElementById('mobileMenu').addEventListener('click', function() {
-    document.getElementById('sidebar').classList.toggle('open');
+    sidebar.classList.toggle('open');
+    if (overlay) overlay.classList.toggle('active');
   });
+
+  if (overlay) {
+    overlay.addEventListener('click', function() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+    });
+  }
 
   // Load settings
   Settings.load();

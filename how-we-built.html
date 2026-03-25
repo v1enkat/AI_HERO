@@ -28,8 +28,8 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body { font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--cream); }
+html { scroll-behavior: smooth; overflow-x: hidden; }
+body { font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--cream); overflow-x: hidden; }
 
 /* ========== TOP BAR ========== */
 .topbar {
@@ -84,9 +84,52 @@ body { font-family: 'DM Sans', sans-serif; color: var(--text); background: var(-
   font-weight: 600;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+  .topbar { padding: 0.6rem 1rem; }
   .topbar-nav { gap: 0.8rem; }
   .topbar-nav a { font-size: 0.72rem; }
+  .page-hero { padding: 4rem 1.2rem 2.5rem; }
+  .page-hero p { font-size: 0.9rem; }
+  .content { padding: 2rem 1rem 3rem; }
+  .section-sub { font-size: 0.88rem; margin-bottom: 2rem; }
+  .prompt-timeline { padding-left: 2.5rem; }
+  .prompt-card { padding: 1.2rem; }
+  .prompt-title { font-size: 1.05rem; }
+  .prompt-text { font-size: 0.72rem; padding: 0.8rem; }
+  .prompt-result { font-size: 0.82rem; }
+  .prompt-output-tag { font-size: 0.65rem; }
+  .tools-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.8rem; }
+  .tool-card { padding: 1rem; }
+  .tool-icon { font-size: 1.6rem; }
+  .tool-name { font-size: 0.78rem; }
+  .tool-desc { font-size: 0.7rem; }
+  .steps-container { max-width: 100%; }
+  .step-header { padding: 0.8rem 1rem; gap: 0.5rem; }
+  .step-title { font-size: 0.85rem; }
+  .step-body { padding: 1rem; }
+  .step-body p { font-size: 0.8rem; }
+  .step-code { font-size: 0.7rem; padding: 0.6rem 0.8rem; word-break: break-all; }
+  .badge-footer { padding: 1.5rem 1rem; }
+  .badge-footer h3 { font-size: 1.1rem; }
+  .badge-footer p { font-size: 0.82rem; }
+  .no-dep-tag { font-size: 0.65rem; padding: 0.25rem 0.6rem; }
+  .footer { padding: 2rem 1rem; font-size: 0.78rem; }
+}
+
+@media (max-width: 480px) {
+  .topbar-logo { font-size: 1rem; }
+  .topbar-nav a { font-size: 0.65rem; padding: 4px 10px; }
+  .nav-cta { padding: 4px 12px !important; font-size: 0.65rem !important; }
+  .page-hero { padding: 3.5rem 1rem 2rem; }
+  .page-hero h1 { margin-bottom: 0.6rem; }
+  .page-hero p { font-size: 0.82rem; line-height: 1.6; }
+  .prompt-timeline { padding-left: 2rem; }
+  .prompt-step-number { left: -2rem; width: 1.8rem; height: 1.8rem; font-size: 0.7rem; }
+  .prompt-timeline::before { left: 0.8rem; }
+  .prompt-card { padding: 1rem; }
+  .prompt-text { font-size: 0.65rem; }
+  .tools-grid { grid-template-columns: 1fr 1fr; }
+  .step-arrow { font-size: 1.2rem; }
 }
 
 /* ========== HERO BANNER ========== */
