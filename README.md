@@ -39,9 +39,10 @@ AI HER-AI is the world's first **Life Operating System** designed exclusively fo
 
 | Layer | Technology |
 |---|---|
-| Frontend | Vanilla HTML, CSS, JavaScript (no frameworks) |
-| AI/LLM | Groq API with LLaMA 3.3 70B Versatile |
-| Geolocation | Browser Geolocation API + OpenStreetMap Nominatim |
+| Frontend | React 19, TypeScript, Vite, React Router |
+| State | Zustand with `localStorage` persistence (`herai_data`, same key as the original app) |
+| AI/LLM | Groq API with LLaMA 3.3 70B Versatile (optional; rule-based fallback offline) |
+| Geolocation | Browser Geolocation API + OpenStreetMap Nominatim (geo-reminders) |
 | Storage | localStorage (client-side, no backend) |
 | Fonts | Playfair Display, DM Sans, Syne, JetBrains Mono (Google Fonts) |
 
@@ -51,29 +52,24 @@ AI HER-AI is the world's first **Life Operating System** designed exclusively fo
 
 ```
 ai-heros/
-├── index.html           # Landing page with 8-theme showcase
-├── app.html             # Main application (dashboard + all modules)
-├── app.css              # Application styles (light/dark themes)
-├── app.js               # Combined application logic (standalone)
-├── app.state.js         # State management (localStorage persistence)
-├── app.init.js          # App initialization and event binding
-├── app.router.js        # Client-side page routing
-├── app.ui.js            # UI utilities (modal, toast, theme)
-├── app.dashboard.js     # Dashboard with insights, schedule, suggestions
-├── app.productivity.js  # Task management + energy tracker
-├── app.scheduler.js     # Smart Scheduler with AI day planning
-├── app.learning.js      # AI Instructor + course system
-├── app.home.js          # Grocery, meal plan, family, geo-reminders
-├── app.finance.js       # Expense tracking + budget management
-├── app.leadership.js    # Email rewriter + negotiation scripts
-├── app.branding.js      # LinkedIn, elevator pitch, social posts
-├── app.wellness.js      # Mood, sleep, cycle tracking, breaks
-├── app.ai-engine.js     # AI brain (LLM integration + rule-based fallback)
-├── app.ai-chat.js       # Chat interface
-├── app.settings.js      # User settings + API key management
-├── architecture.html    # Technical architecture documentation
-├── presentation.html    # Project presentation/pitch deck
-├── config.example.js    # Example config (copy to config.js)
+├── index.html                 # Vite entry (mounts React)
+├── package.json
+├── vite.config.ts
+├── src/
+│   ├── main.tsx
+│   ├── App.tsx                # Routes
+│   ├── components/            # layout (sidebar, topbar), ui (modal)
+│   ├── pages/                 # Landing + /app/* feature pages
+│   ├── store/useHerAIStore.ts # Zustand + persist
+│   ├── services/aiEngine.ts   # Rules + Groq + instructor logic
+│   ├── data/courseData.json   # AI Instructor courses (from legacy extract script)
+│   ├── context/ToastContext.tsx
+│   ├── types/herai.ts
+│   └── styles/app.css         # Original app stylesheet (+ small React additions)
+├── public/                    # Static assets (presentation, architecture, etc.)
+├── legacy/                    # Original single-file HTML/JS/CSS (reference)
+├── scripts/extract-course-data.mjs
+├── .env.example               # VITE_GROQ_API_KEY (optional)
 └── .gitignore
 ```
 
@@ -81,41 +77,38 @@ ai-heros/
 
 ## Getting Started
 
-### 1. Clone the repository
+### 1. Install dependencies
 
 ```bash
-git clone https://github.com/Gayatri-Kharat/HER-AI.git
-cd HER-AI
+cd ai-heros
+npm install
 ```
 
-### 2. Set up the AI API key (optional)
+### 2. Optional: Groq API key
 
-Copy the example config and add your [Groq API key](https://console.groq.com/keys):
+Copy `.env.example` to `.env` and set [Groq](https://console.groq.com/keys) variables, or enter the key in **Settings** inside the app.
+
+```
+VITE_GROQ_API_KEY=your-key
+VITE_GROQ_MODEL=llama-3.3-70b-versatile
+```
+
+Without a key, the app uses built-in rule-based responses for chat and tools.
+
+### 3. Run the dev server
 
 ```bash
-cp config.example.js config.js
+npm run dev
 ```
 
-Edit `config.js`:
+Open the URL Vite prints (usually [http://localhost:5173](http://localhost:5173)). Use **Open the app** on the landing page or go to `/app/dashboard`.
 
-```javascript
-const CONFIG = {
-  GROQ_API_KEY: 'your-groq-api-key-here',
-  GROQ_MODEL: 'llama-3.3-70b-versatile'
-};
-```
-
-> Without an API key, the app still works with built-in rule-based responses. The LLM adds personalized, conversational AI responses.
-
-### 3. Start a local server
+### 4. Production build
 
 ```bash
-python -m http.server 8080
+npm run build
+npm run preview
 ```
-
-### 4. Open in browser
-
-Visit [http://localhost:8080](http://localhost:8080) for the landing page, or [http://localhost:8080/app.html](http://localhost:8080/app.html) to go directly to the dashboard.
 
 ---
 

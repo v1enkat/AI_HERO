@@ -1,3 +1,8 @@
 config.js
 ai-heros.zip
 .vscode/.chrome-debug-userdata/
+node_modules
+dist
+.env
+.env.local
+*.local
