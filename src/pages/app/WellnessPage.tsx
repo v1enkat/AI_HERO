@@ -28,6 +28,7 @@ export function WellnessPage() {
   const addSleep = useHerAIStore((s) => s.addSleep);
 
   const [startDate, setStartDate] = useState(cycle.startDate);
+  const [endDate, setEndDate] = useState(cycle.endDate ?? '');
   const [length, setLength] = useState(String(cycle.length || 28));
   const [sleepH, setSleepH] = useState('');
   const [sleepQ, setSleepQ] = useState('good');
@@ -36,8 +37,9 @@ export function WellnessPage() {
 
   useEffect(() => {
     setStartDate(cycle.startDate);
+    setEndDate(cycle.endDate ?? '');
     setLength(String(cycle.length || 28));
-  }, [cycle.startDate, cycle.length]);
+  }, [cycle.startDate, cycle.endDate, cycle.length]);
 
   useEffect(() => {
     return () => {
@@ -72,10 +74,44 @@ export function WellnessPage() {
   const phase = getCyclePhase();
   const dashOffset = 339.3 * (1 - score / 100);
 
+  const daysSinceLastPeriodStart = useMemo(() => {
+    if (!startDate) return null;
+    const start = new Date(startDate);
+    const today = new Date();
+    const diff = Math.floor((today.getTime() - start.getTime()) / 86400000);
+    return Math.max(0, diff);
+  }, [startDate]);
+
+  const cycleIntervalDays = parseInt(length, 10) || 28;
+
+  /** Advisory tied to the same “days since last period” count shown above (current cycle length so far). */
+  const daysSinceAdvisory = useMemo(() => {
+    if (daysSinceLastPeriodStart == null) return null;
+    if (daysSinceLastPeriodStart > 35) {
+      return 'This may be due to delayed or absent ovulation caused by stress, hormonal imbalance, pregnancy, thyroid disorders, or PCOS.';
+    }
+    return null;
+  }, [daysSinceLastPeriodStart]);
+
+  /** Short-cycle note: uses typical interval from the form so we don’t warn on day 1–20 of a normal cycle. */
+  const shortCycleAdvisory = useMemo(() => {
+    if (cycleIntervalDays >= 21) return null;
+    return 'This may be due to hormonal imbalance, stress, thyroid issues, or conditions like PCOS, leading to early ovulation and shorter cycles.';
+  }, [cycleIntervalDays]);
+
+  const cycleIntervalNote = daysSinceAdvisory ?? shortCycleAdvisory;
+
   const updateCycle = () => {
+    let safeEnd = endDate;
+    if (startDate && safeEnd && safeEnd < startDate) {
+      safeEnd = startDate;
+      setEndDate(safeEnd);
+      toast('Last day of period cannot be before the start date.', 'info');
+    }
     setCycle({
       startDate,
-      length: parseInt(length, 10) || 28,
+      endDate: safeEnd,
+      length: cycleIntervalDays,
     });
   };
 
@@ -173,7 +209,7 @@ export function WellnessPage() {
         <p className="lead-desc">Track your cycle and get phase-specific recommendations.</p>
         <div className="cycle-tracker-grid">
           <div className="ct-input-group">
-            <label htmlFor="csd">Last period start date:</label>
+            <label htmlFor="csd">Start date of your last period:</label>
             <input
               id="csd"
               type="date"
@@ -181,18 +217,49 @@ export function WellnessPage() {
               onChange={(e) => setStartDate(e.target.value)}
               onBlur={updateCycle}
             />
-            <label htmlFor="cl">Average cycle length (days):</label>
+            <label htmlFor="ced">Last day of your last period:</label>
+            <input
+              id="ced"
+              type="date"
+              value={endDate}
+              min={startDate || undefined}
+              onChange={(e) => setEndDate(e.target.value)}
+              onBlur={updateCycle}
+            />
+            <label htmlFor="cl">Average days between period starts:</label>
             <input
               id="cl"
               type="number"
-              min={21}
-              max={40}
+              min={15}
+              max={60}
               value={length}
               onChange={(e) => setLength(e.target.value)}
               onBlur={updateCycle}
             />
           </div>
           <div className="ct-phase-display" id="cyclePhaseDisplay">
+            <div className="ct-days-since-block">
+              <div className="ct-phase-name">Since your last period</div>
+              {startDate ? (
+                <>
+                  <div className="ct-days-since-value">
+                    <div className="ct-days-since-line-main">
+                      <span className="ct-days-since-num">{daysSinceLastPeriodStart}</span>
+                      <span className="ct-days-since-unit">
+                        {daysSinceLastPeriodStart === 1 ? 'day' : 'days'}
+                      </span>
+                    </div>
+                    <div className="ct-days-since-caption">since the start of your last period</div>
+                  </div>
+                  {cycleIntervalNote ? (
+                    <p className="ct-cycle-advisory">{cycleIntervalNote}</p>
+                  ) : null}
+                </>
+              ) : (
+                <div className="ct-phase-day">Enter your period dates on the left to see how many days have passed.</div>
+              )}
+            </div>
+            <div className="ct-phase-divider" />
             <div className="ct-phase-name" id="ctPhaseName">
               {phase.text}
             </div>

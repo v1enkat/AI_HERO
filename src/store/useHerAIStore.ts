@@ -30,7 +30,7 @@ export interface HerAIPersisted {
   moods: MoodEntry[];
   sleepLog: SleepEntry[];
   finance: { income: number; savingsGoal: number };
-  cycle: { startDate: string; length: number };
+  cycle: { startDate: string; endDate?: string; length: number };
   settings: { theme: 'light' | 'dark'; apiKey: string; apiProvider: string; lang: string };
   chatHistory: ChatTurn[];
   instructorTopic: InstructorTopicKey;
@@ -85,7 +85,7 @@ const initial: HerAIPersisted = {
   moods: [],
   sleepLog: [],
   finance: { income: 0, savingsGoal: 0 },
-  cycle: { startDate: '', length: 28 },
+  cycle: { startDate: '', endDate: '', length: 28 },
   settings: { theme: 'light', apiKey: '', apiProvider: 'builtin', lang: 'en' },
   chatHistory: [],
   instructorTopic: null,

@@ -1430,6 +1430,44 @@ select {
 .ct-input-group label { display: block; font-size: 0.82rem; color: var(--text-light); margin-bottom: 0.3rem; margin-top: 0.8rem; }
 .ct-input-group input { width: 100%; padding: 0.6rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.88rem; background: var(--bg); color: var(--text); }
 
+.ct-days-since-block { margin-bottom: 1rem; }
+.ct-days-since-value { margin-bottom: 0.5rem; }
+.ct-days-since-line-main {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+.ct-days-since-num {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--plum);
+  line-height: 1.1;
+}
+.ct-days-since-unit {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.ct-days-since-caption {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+  line-height: 1.4;
+}
+.ct-cycle-advisory {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+.ct-phase-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 1rem 0;
+  opacity: 0.85;
+}
+
 .ct-phase-name { font-family: inherit; font-size: 1.2rem; font-weight: 700; color: var(--plum); margin-bottom: 0.3rem; }
 .ct-phase-day { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.8rem; }
 .ct-recommendations { font-size: 0.88rem; color: var(--text-light); line-height: 1.7; }
