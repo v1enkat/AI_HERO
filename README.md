@@ -39,37 +39,45 @@ AI HER-AI is the world's first **Life Operating System** designed exclusively fo
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 19, TypeScript, Vite, React Router |
+| Frontend | React 19, TypeScript, Vite, React Router (`client/`) |
+| Backend | Node.js, Express (`server/`) — Groq proxy + optional static SPA |
 | State | Zustand with `localStorage` persistence (`herai_data`, same key as the original app) |
 | AI/LLM | Groq API with LLaMA 3.3 70B Versatile (optional; rule-based fallback offline) |
 | Geolocation | Browser Geolocation API + OpenStreetMap Nominatim (geo-reminders) |
-| Storage | localStorage (client-side, no backend) |
-| Fonts | Playfair Display, DM Sans, Syne, JetBrains Mono (Google Fonts) |
+| Storage | localStorage (client-side); API keys for Groq stay on the server in the default setup |
+| Fonts | Inter, JetBrains Mono (Google Fonts) |
 
 ---
 
 ## Project Structure
 
+Monorepo (npm workspaces): **client** (Vite + React) and **server** (Express API).
+
 ```
 ai-heros/
-├── index.html                 # Vite entry (mounts React)
-├── package.json
-├── vite.config.ts
-├── src/
-│   ├── main.tsx
-│   ├── App.tsx                # Routes
-│   ├── components/            # layout (sidebar, topbar), ui (modal)
-│   ├── pages/                 # Landing + /app/* feature pages
-│   ├── store/useHerAIStore.ts # Zustand + persist
-│   ├── services/aiEngine.ts   # Rules + Groq + instructor logic
-│   ├── data/courseData.json   # AI Instructor courses (from legacy extract script)
-│   ├── context/ToastContext.tsx
-│   ├── types/herai.ts
-│   └── styles/app.css         # Original app stylesheet (+ small React additions)
-├── public/                    # Static assets (presentation, architecture, etc.)
-├── legacy/                    # Original single-file HTML/JS/CSS (reference)
+├── package.json               # workspaces, dev: client + server
+├── client/
+│   ├── index.html
+│   ├── vite.config.ts         # proxies /api → Node (dev)
+│   ├── package.json
+│   ├── public/
+│   └── src/
+│       ├── main.tsx
+│       ├── App.tsx
+│       ├── components/
+│       ├── pages/
+│       ├── store/useHerAIStore.ts
+│       ├── services/aiEngine.ts
+│       ├── services/groqClient.ts
+│       ├── data/courseData.json
+│       └── styles/app.css
+├── server/
+│   ├── package.json
+│   ├── tsconfig.json
+│   └── src/index.ts           # /api/v1/chat/completions, /api/health, prod static
+├── archive/legacy/            # Old vanilla app (reference only; not used by React)
 ├── scripts/extract-course-data.mjs
-├── .env.example               # VITE_GROQ_API_KEY (optional)
+├── .env.example
 └── .gitignore
 ```
 
@@ -84,31 +92,36 @@ cd ai-heros
 npm install
 ```
 
-### 2. Optional: Groq API key
+### 2. Groq API key (server)
 
-Copy `.env.example` to `.env` and set [Groq](https://console.groq.com/keys) variables, or enter the key in **Settings** inside the app.
+Copy `.env.example` to `.env` at the **repo root** and set:
 
 ```
-VITE_GROQ_API_KEY=your-key
-VITE_GROQ_MODEL=llama-3.3-70b-versatile
+GROQ_API_KEY=your-key
 ```
 
-Without a key, the app uses built-in rule-based responses for chat and tools.
+The Node server uses this to call Groq; the browser only calls `/api/...` (no key in the bundle). You can still paste a key in **Settings** to override from the client.
 
-### 3. Run the dev server
+### 3. Development (client + API)
 
 ```bash
 npm run dev
 ```
 
-Open the URL Vite prints (usually [http://localhost:5173](http://localhost:5173)). Use **Open the app** on the landing page or go to `/app/dashboard`.
+Starts Express on port **3001** and Vite on **5173** (with `/api` proxied to the server). Open [http://localhost:5173](http://localhost:5173).
 
-### 4. Production build
+### 4. Production
 
 ```bash
 npm run build
-npm run preview
+npm start
 ```
+
+Builds `client/dist` and `server/dist`, then runs the server. If `client/dist` exists, the same port serves the SPA and `/api/*` (default **3001**). Open `http://localhost:3001`.
+
+### 5. Client-only / static hosting
+
+If you deploy only the Vite build to a static host, set `VITE_GROQ_DIRECT=1` and a client key (`VITE_GROQ_API_KEY` or Settings), or point `VITE_API_URL` at a deployed API.
 
 ---
 
@@ -117,7 +130,7 @@ npm run preview
 The AI engine uses a **dual-layer architecture**:
 
 1. **Rule-Based Layer** — Instant responses using keyword matching and user data (tasks, budget, moods, cycle). Works offline, no API key needed.
-2. **LLM Layer** — Sends user context + live data to Groq's LLaMA 3.3 70B for personalized, conversational responses. Falls back to rule-based if unavailable.
+2. **LLM Layer** — Sends user context + live data to Groq via the **server proxy** (or direct from the browser if configured). Falls back to rule-based if unavailable.
 
 The AI context includes: user name, energy level, pending tasks, budget status, cycle phase, recent moods, and sleep data — making every response personalized.
 
@@ -136,7 +149,7 @@ The AI context includes: user name, energy level, pending tasks, budget status, 
 - **No other app** combines all 8 life dimensions into one AI system
 - **Cycle-aware** scheduling and productivity — adapts to biological rhythms
 - **Energy-first** task management — not just priority, but how you *feel*
-- **Zero backend** — fully client-side, private, no data leaves your browser
+- **Privacy-first** — app data stays in the browser; Groq calls go through your API by default so keys stay on the server
 - **One AI brain** with shared context — your budget affects your schedule, your mood affects your tasks
 
 ---

@@ -3,24 +3,18 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "workspaces": [
+    "client",
+    "server"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
+    "dev": "concurrently -n server,client -c blue,green \"npm run dev -w server\" \"npm run dev -w client\"",
+    "build": "npm run build -w client && npm run build -w server",
+    "start": "npm run start -w server",
+    "preview": "npm run preview -w client",
     "extract-courses": "node scripts/extract-course-data.mjs"
   },
-  "dependencies": {
-    "lucide-react": "^1.6.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-router-dom": "^7.4.0",
-    "zustand": "^5.0.3"
-  },
   "devDependencies": {
-    "@types/react": "^19.0.12",
-    "@types/react-dom": "^19.0.4",
-    "@vitejs/plugin-react": "^4.3.4",
-    "typescript": "~5.7.2",
-    "vite": "^6.2.1"
+    "concurrently": "^9.1.2"
   }
 }

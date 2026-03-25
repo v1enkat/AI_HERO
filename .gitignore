@@ -1,8 +1,12 @@
+# Local secrets — prefer repo-root .env for client/server (see .env.example)
 config.js
-ai-heros.zip
+# Archives / accidental exports
+*.zip
 .vscode/.chrome-debug-userdata/
 node_modules
 dist
+client/dist
+server/dist
 .env
 .env.local
 *.local

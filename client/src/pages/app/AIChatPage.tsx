@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useHerAIStore } from '../../store/useHerAIStore';
-import { chatLLM } from '../../services/aiEngine';
+import { chatLLM, isGroqConfigured } from '../../services/aiEngine';
 
 export function AIChatPage() {
   const chatHistory = useHerAIStore((s) => s.chatHistory);
@@ -16,8 +16,11 @@ export function AIChatPage() {
     setLoading(true);
     try {
       await chatLLM(msg);
-    } catch {
-      setError('Could not reach the AI service. Check your API key in Settings or try again.');
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : 'Unknown error';
+      setError(
+        `AI request failed: ${detail} — Check Settings → AI (Groq) or your .env key, or try another model via VITE_GROQ_MODEL.`
+      );
     } finally {
       setLoading(false);
     }
@@ -28,6 +31,16 @@ export function AIChatPage() {
       <div className="page-header">
         <h1 className="page-title">🧠 AI HER-AI Assistant</h1>
         <p className="page-sub">Your personal AI that understands your whole life</p>
+        {!isGroqConfigured() && (
+          <p
+            className="page-sub"
+            style={{ marginTop: '0.5rem', color: 'var(--muted)', fontSize: '0.9rem' }}
+          >
+            No LLM path configured — using built-in rules. Set <code>GROQ_API_KEY</code> in the project root{' '}
+            <code>.env</code> (recommended) or add a key in Settings / <code>VITE_GROQ_API_KEY</code> for
+            browser-direct mode.
+          </p>
+        )}
       </div>
 
       <div className="chat-container">

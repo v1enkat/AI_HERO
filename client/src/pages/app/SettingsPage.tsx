@@ -26,7 +26,17 @@ export function SettingsPage() {
 
   const save = () => {
     setUser({ name });
-    setSettings({ apiKey, apiProvider: provider, lang, theme });
+    const trimmedKey = apiKey.trim();
+    const nextProvider = trimmedKey && provider === 'builtin' ? 'groq' : provider;
+    setSettings({
+      apiKey: trimmedKey,
+      apiProvider: nextProvider,
+      lang,
+      theme,
+    });
+    if (trimmedKey && provider === 'builtin') {
+      setProvider('groq');
+    }
     document.body.dataset.theme = theme;
     toast('⚙️ Settings saved!', 'success');
   };
@@ -77,8 +87,9 @@ export function SettingsPage() {
       <div className="well-card wide">
         <h3>AI (Groq)</h3>
         <p className="lead-desc">
-          Add a Groq API key for richer chat and tools, or leave blank to use built-in rule-based responses.
-          You can also set <code>VITE_GROQ_API_KEY</code> in a <code>.env</code> file for local dev.
+          Optional: paste a key to send from the browser (overrides the server key). For the default setup, put{' '}
+          <code>GROQ_API_KEY</code> in the repo root <code>.env</code> and run <code>npm run dev</code> — the Node
+          server proxies Groq so the key stays off the client.
         </p>
         <label htmlFor="settingApiKey">API key</label>
         <input

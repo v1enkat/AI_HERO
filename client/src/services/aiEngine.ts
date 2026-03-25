@@ -1,6 +1,7 @@
 import courseData from '../data/courseData.json';
 import { useHerAIStore } from '../store/useHerAIStore';
 import type { ChatTurn, InstructorTopicKey } from '../types/herai';
+import { groqChatCompletion, isDirectGroqPublicEndpoint } from './groqClient';
 
 type CourseKey = keyof typeof courseData;
 
@@ -346,8 +347,16 @@ export function socialPost(topic: string, platform: string): string {
   return `✨ ${topic}\n\nSometimes the best stories come from unexpected places. This experience taught me that growth happens outside your comfort zone.\n\nDouble-tap if you agree! 💜\n\n#Motivation #WomenWhoLead #GrowthMindset`;
 }
 
-function getApiKey(): string {
-  return (import.meta.env.VITE_GROQ_API_KEY || '').trim() || S().settings.apiKey || '';
+/** True when the app can reach Groq: client key set, or backend proxy (no direct public Groq without key). */
+export function isGroqConfigured(): boolean {
+  if (getGroqApiKey()) return true;
+  return !isDirectGroqPublicEndpoint();
+}
+
+function getGroqApiKey(): string {
+  const envKey = (import.meta.env.VITE_GROQ_API_KEY || '').trim();
+  if (envKey) return envKey;
+  return (S().settings.apiKey || '').trim();
 }
 
 function getGroqModel(): string {
@@ -372,30 +381,17 @@ export async function callLLM(
   fallbackFn: () => string | Promise<string>,
   maxTokens = 700
 ): Promise<string> {
-  const apiKey = getApiKey();
-  if (!apiKey) return fallbackFn();
-  try {
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: getGroqModel(),
-        messages: [{ role: 'system', content: systemPrompt }, ...messages],
-        max_tokens: maxTokens,
-        temperature: 0.7,
-      }),
-    });
-    if (!res.ok) return fallbackFn();
-    const data = (await res.json()) as {
-      choices?: { message?: { content?: string } }[];
-    };
-    return data.choices?.[0]?.message?.content || (await fallbackFn());
-  } catch {
-    return fallbackFn();
-  }
+  const apiKey = getGroqApiKey();
+  if (!apiKey && isDirectGroqPublicEndpoint()) return fallbackFn();
+  const out = await groqChatCompletion({
+    apiKey,
+    model: getGroqModel(),
+    systemPrompt,
+    messages,
+    maxTokens,
+  });
+  if (!out.ok) return fallbackFn();
+  return out.content || (await fallbackFn());
 }
 
 function liveDataForQuery(msg: string): string {
@@ -559,11 +555,14 @@ export function chatRuleBased(msg: string): string {
 }
 
 export async function chatLLM(msg: string): Promise<string> {
-  const st = useHerAIStore.getState();
-  const history = [...st.chatHistory, { role: 'user' as const, content: msg }].slice(-20) as ChatTurn[];
+  const prev = useHerAIStore.getState().chatHistory;
+  const historyAfterUser = [...prev, { role: 'user' as const, content: msg }].slice(-20) as ChatTurn[];
+  useHerAIStore.setState({ chatHistory: historyAfterUser });
 
+  const apiKey = getGroqApiKey();
   let result: string;
-  if (!getApiKey()) {
+
+  if (!apiKey && isDirectGroqPublicEndpoint()) {
     result = chatRuleBased(msg);
   } else {
     const userContext = userContextString();
@@ -571,10 +570,20 @@ export async function chatLLM(msg: string): Promise<string> {
     const systemPrompt = `You are HER-AI, a warm, supportive AI Life Operating System designed for women. You help with productivity, scheduling, finance, wellness, learning, home management, leadership, and personal branding. Be conversational, empathetic, and actionable like a knowledgeable best friend. Use emojis naturally but not excessively. Keep responses concise (2-4 paragraphs max). Personalize using the user's data when relevant.\n\n${userContext}${
       liveData ? '\n\nRelevant live data:\n' + liveData : ''
     }`;
-    result = await callLLM(systemPrompt, history, () => chatRuleBased(msg));
+    const out = await groqChatCompletion({
+      apiKey,
+      model: getGroqModel(),
+      systemPrompt,
+      messages: historyAfterUser,
+      maxTokens: 1024,
+    });
+    if (!out.ok) {
+      throw new Error(out.message);
+    }
+    result = out.content;
   }
 
-  const nextHistory = [...history, { role: 'assistant' as const, content: result }].slice(-20) as ChatTurn[];
+  const nextHistory = [...historyAfterUser, { role: 'assistant' as const, content: result }].slice(-20) as ChatTurn[];
   useHerAIStore.setState({ chatHistory: nextHistory });
   return result;
 }

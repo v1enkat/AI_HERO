@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
-const s = fs.readFileSync(path.join(root, 'legacy/app.ai-engine.js'), 'utf8');
+const s = fs.readFileSync(path.join(root, 'archive', 'legacy', 'app.ai-engine.js'), 'utf8');
 const start = s.indexOf('courseData:');
 if (start < 0) throw new Error('no courseData');
 let i = s.indexOf('{', start);
@@ -23,7 +23,7 @@ for (; j < s.length; j++) {
 }
 const objStr = s.slice(i, j);
 const courseData = Function(`"use strict"; return (${objStr})`)();
-const outDir = path.join(root, 'src/data');
+const outDir = path.join(root, 'client', 'src', 'data');
 fs.mkdirSync(outDir, { recursive: true });
 fs.writeFileSync(path.join(outDir, 'courseData.json'), JSON.stringify(courseData));
 console.log('OK', Object.keys(courseData));
