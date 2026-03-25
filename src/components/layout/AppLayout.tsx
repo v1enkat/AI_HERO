@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { LayoutGrid, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { useHerAIStore } from '../../store/useHerAIStore';
@@ -17,16 +17,10 @@ export function AppLayout() {
 
   return (
     <>
+      <Topbar onMenuClick={() => setSidebarOpen(true)} />
+
       <aside className={'sidebar' + (sidebarOpen ? ' open' : '')} id="sidebar">
         <div className="sidebar-header">
-          <div className="sidebar-logo">
-            <span className="logo-mark" aria-hidden>
-              <LayoutGrid />
-            </span>
-            <span className="logo-text">
-              HER<span className="logo-accent">-AI</span>
-            </span>
-          </div>
           <button
             type="button"
             className="sidebar-toggle"
@@ -46,7 +40,6 @@ export function AppLayout() {
       />
 
       <main className="main" id="main">
-        <Topbar onMenuClick={() => setSidebarOpen(true)} />
         <Outlet />
       </main>
     </>
