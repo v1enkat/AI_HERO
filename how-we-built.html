@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How We Built HER-AI — Development Process & Setup Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --plum: #6B2D5B;
+  --plum-deep: #4A1942;
+  --rose: #E8526F;
+  --rose-soft: #F2A3B3;
+  --gold: #D4A853;
+  --gold-light: #F5DCA0;
+  --cream: #FFF8F0;
+  --lavender: #C5A3CF;
+  --mint: #7ECEC1;
+  --coral: #F08A6D;
+  --sky: #7EB5D6;
+  --peach: #F5C7A9;
+  --night: #1A0E2E;
+  --white: #FFFFFF;
+  --text: #2D1B33;
+  --text-light: #8B7A91;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--cream); }
+
+/* ========== TOP BAR ========== */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 2rem;
+  background: rgba(74,25,66,0.97);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 4px 30px rgba(0,0,0,0.2);
+}
+
+.topbar-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--white);
+  text-decoration: none;
+}
+
+.topbar-logo .accent { color: var(--gold); }
+
+.topbar-nav {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  list-style: none;
+}
+
+.topbar-nav a {
+  color: rgba(255,255,255,0.7);
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-family: 'Syne', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: color 0.3s;
+}
+
+.topbar-nav a:hover { color: var(--gold); }
+
+.topbar-nav .nav-cta {
+  background: linear-gradient(135deg, var(--gold), var(--rose));
+  color: #fff;
+  padding: 6px 18px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .topbar-nav { gap: 0.8rem; }
+  .topbar-nav a { font-size: 0.72rem; }
+}
+
+/* ========== HERO BANNER ========== */
+.page-hero {
+  margin-top: 60px;
+  padding: 5rem 2rem 3rem;
+  background: linear-gradient(135deg, var(--plum-deep) 0%, var(--plum) 50%, #8B3A7F 100%);
+  text-align: center;
+}
+
+.page-hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 900;
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.page-hero h1 .accent { color: var(--gold); }
+
+.page-hero p {
+  font-size: 1.05rem;
+  color: rgba(255,255,255,0.75);
+  max-width: 650px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* ========== MAIN CONTENT ========== */
+.content {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 3rem 2rem 4rem;
+}
+
+.section-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 1rem;
+  display: block;
+  text-align: center;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 900;
+  color: var(--plum-deep);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.section-sub {
+  font-size: 1rem;
+  color: var(--text-light);
+  max-width: 600px;
+  margin: 0 auto 3rem;
+  line-height: 1.7;
+  text-align: center;
+}
+
+/* ========== PROMPT TIMELINE ========== */
+.prompt-timeline {
+  position: relative;
+  padding-left: 3rem;
+  margin-bottom: 4rem;
+}
+
+.prompt-timeline::before {
+  content: '';
+  position: absolute;
+  left: 1.1rem;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--gold), var(--plum), var(--rose));
+  border-radius: 2px;
+}
+
+.prompt-step {
+  position: relative;
+  margin-bottom: 2.5rem;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s ease-out;
+}
+
+.prompt-step.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.prompt-step-number {
+  position: absolute;
+  left: -3rem;
+  top: 0;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: white;
+  z-index: 1;
+}
+
+.prompt-step:nth-child(1) .prompt-step-number { background: var(--gold); }
+.prompt-step:nth-child(2) .prompt-step-number { background: var(--plum); }
+.prompt-step:nth-child(3) .prompt-step-number { background: var(--rose); }
+
+.prompt-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.8rem;
+  box-shadow: 0 4px 20px rgba(107,45,91,0.06);
+  border: 1px solid rgba(107,45,91,0.06);
+}
+
+.prompt-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 0.6rem;
+}
+
+.prompt-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--plum-deep);
+  margin-bottom: 0.8rem;
+}
+
+.prompt-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  background: linear-gradient(135deg, #1A0E2E, #2D1B33);
+  color: #E8D5F5;
+  padding: 1rem 1.2rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  border-left: 3px solid var(--gold);
+}
+
+.prompt-result {
+  font-size: 0.88rem;
+  color: var(--text);
+  line-height: 1.7;
+}
+
+.prompt-result strong { color: var(--plum); }
+
+.prompt-output-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.8rem;
+}
+
+.prompt-output-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.3rem 0.7rem;
+  border-radius: 20px;
+  background: rgba(212,168,83,0.1);
+  color: var(--plum);
+  font-family: 'Syne', sans-serif;
+  letter-spacing: 0.5px;
+}
+
+/* ========== DIVIDER ========== */
+.section-divider {
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold), var(--rose));
+  margin: 0 auto 3rem;
+  border-radius: 2px;
+}
+
+/* ========== TOOLS GRID ========== */
+.tools-heading {
+  font-family: 'Syne', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--plum);
+  text-align: center;
+  margin-bottom: 1.2rem;
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+
+.tool-card {
+  background: white;
+  border-radius: 14px;
+  padding: 1.4rem;
+  text-align: center;
+  box-shadow: 0 3px 15px rgba(107,45,91,0.05);
+  border: 1px solid rgba(107,45,91,0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tool-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(107,45,91,0.1);
+}
+
+.tool-icon { font-size: 2rem; margin-bottom: 0.6rem; }
+
+.tool-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--plum-deep);
+  margin-bottom: 0.4rem;
+}
+
+.tool-desc {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  line-height: 1.5;
+  margin-bottom: 0.6rem;
+}
+
+.tool-tag {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  font-family: 'Syne', sans-serif;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 0.2rem 0.7rem;
+  border-radius: 20px;
+}
+
+.tool-tag.free { background: rgba(126,206,193,0.15); color: #2A8A7A; }
+.tool-tag.optional { background: rgba(212,168,83,0.12); color: var(--gold); }
+
+/* ========== STEP CARDS ========== */
+.steps-container {
+  max-width: 700px;
+  margin: 0 auto 2.5rem;
+}
+
+.step-card {
+  background: white;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 3px 15px rgba(107,45,91,0.05);
+  border: 1px solid rgba(107,45,91,0.06);
+}
+
+.step-card-alt {
+  border: 2px solid var(--gold);
+  background: rgba(212,168,83,0.03);
+}
+
+.step-card-highlight {
+  border: 2px solid var(--mint);
+  background: rgba(126,206,193,0.03);
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem 1.4rem;
+  background: linear-gradient(135deg, var(--plum-deep), var(--plum));
+}
+
+.step-card-alt .step-header {
+  background: linear-gradient(135deg, var(--gold), #C4963F);
+}
+
+.step-card-highlight .step-header {
+  background: linear-gradient(135deg, #2A8A7A, #3BA898);
+}
+
+.step-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.step-card-alt .step-num { color: white; }
+
+.step-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: white;
+}
+
+.step-body { padding: 1.2rem 1.4rem; }
+
+.step-body p {
+  font-size: 0.85rem;
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: 0.6rem;
+}
+
+.step-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  background: linear-gradient(135deg, #1A0E2E, #2D1B33);
+  color: #E8D5F5;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.6rem;
+  line-height: 1.6;
+  border-left: 3px solid var(--gold);
+}
+
+.step-alt {
+  font-size: 0.78rem !important;
+  color: var(--text-light) !important;
+  font-style: italic;
+  margin-bottom: 0 !important;
+}
+
+.step-arrow {
+  text-align: center;
+  font-size: 1.5rem;
+  color: var(--lavender);
+  padding: 0.5rem 0;
+}
+
+.step-link {
+  background: rgba(107,45,91,0.04);
+  border: 1px dashed rgba(107,45,91,0.15);
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  text-align: center;
+  margin-bottom: 0.6rem;
+}
+
+/* ========== FOOTER BADGE ========== */
+.badge-footer {
+  text-align: center;
+  margin-top: 3rem;
+  padding: 2rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(107,45,91,0.06);
+  border: 1px solid rgba(107,45,91,0.06);
+}
+
+.badge-footer h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  color: var(--plum-deep);
+  margin-bottom: 0.8rem;
+}
+
+.badge-footer p {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  line-height: 1.7;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.no-dep-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.2rem;
+}
+
+.no-dep-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: 'Syne', sans-serif;
+  letter-spacing: 0.5px;
+  padding: 0.35rem 0.8rem;
+  border-radius: 20px;
+}
+
+.no-dep-tag.yes { background: rgba(126,206,193,0.15); color: #2A8A7A; }
+
+/* ========== PAGE FOOTER ========== */
+.footer {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: var(--plum-deep);
+  color: rgba(255,255,255,0.5);
+  font-size: 0.85rem;
+}
+
+.footer a {
+  color: var(--gold);
+  text-decoration: none;
+  font-weight: 600;
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <a href="index.html" class="topbar-logo">HER<span class="accent">-AI</span></a>
+  <ul class="topbar-nav">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="app.html" class="nav-cta">Launch App</a></li>
+  </ul>
+</div>
+
+<!-- HERO -->
+<section class="page-hero">
+  <h1>How We <span class="accent">Built</span> HER-AI</h1>
+  <p>An entire Life Operating System created with just 3 AI prompts. No months of coding. No complex tools. Here's exactly how we did it &mdash; and how you can run it on your laptop in under 2 minutes.</p>
+</section>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- PART 1: THE 3 PROMPTS -->
+  <span class="section-label">Development Process</span>
+  <h2 class="section-title">Built with 3 Prompts. That's It.</h2>
+  <p class="section-sub">We used Cursor IDE (an AI-powered code editor) to build the entire system through just 3 strategic prompts &mdash; proving that powerful apps can be created rapidly by anyone.</p>
+
+  <div class="prompt-timeline">
+    <div class="prompt-step">
+      <div class="prompt-step-number">1</div>
+      <div class="prompt-card">
+        <div class="prompt-label">Prompt 1 &mdash; The Foundation</div>
+        <div class="prompt-title">Design the full Life Operating System</div>
+        <div class="prompt-text">"Build a complete Life Operating System for women called HER-AI with 8 modules: Productivity (energy-based task management), Smart Scheduler (cycle-aware planning), Learning (AI instructor with courses), Home Life (grocery, meals, geo-reminders), Finance (budgeting &amp; tracking), Leadership (email rewriting, negotiation), Branding (LinkedIn, pitches), and Wellness (mood, sleep, cycle tracking). Use vanilla HTML/CSS/JS, no frameworks. Include a landing page and a dashboard app. Use Groq LLM with rule-based fallback."</div>
+        <div class="prompt-result">
+          <strong>Output:</strong> Complete app with all 8 modules, landing page with animations, dashboard with AI insights, hybrid AI engine, full CSS design system with light/dark themes.
+        </div>
+        <div class="prompt-output-tags">
+          <span class="prompt-output-tag">16 JS modules</span>
+          <span class="prompt-output-tag">Landing Page</span>
+          <span class="prompt-output-tag">Dashboard</span>
+          <span class="prompt-output-tag">AI Engine</span>
+          <span class="prompt-output-tag">4 Courses</span>
+          <span class="prompt-output-tag">Cycle Tracking</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="prompt-step">
+      <div class="prompt-step-number">2</div>
+      <div class="prompt-card">
+        <div class="prompt-label">Prompt 2 &mdash; Intelligence Layer</div>
+        <div class="prompt-title">Make the AI contextual and personalized</div>
+        <div class="prompt-text">"Connect the AI chat to live user data &mdash; tasks, budget, moods, energy level, cycle phase, schedule. The AI should give specific answers based on actual data, not generic advice. Add energy-based task highlighting (recommended vs defer). Fix geo-reminders to use real browser geolocation with OpenStreetMap reverse geocoding instead of random simulation."</div>
+        <div class="prompt-result">
+          <strong>Output:</strong> Personalized AI responses using real data, energy-adaptive task UI with visual indicators, real GPS-based geo-reminders matching store categories.
+        </div>
+        <div class="prompt-output-tags">
+          <span class="prompt-output-tag">Live Data Context</span>
+          <span class="prompt-output-tag">Energy UI</span>
+          <span class="prompt-output-tag">Real Geolocation</span>
+          <span class="prompt-output-tag">Smart Fallbacks</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="prompt-step">
+      <div class="prompt-step-number">3</div>
+      <div class="prompt-card">
+        <div class="prompt-label">Prompt 3 &mdash; Polish &amp; Deploy</div>
+        <div class="prompt-title">Make it production-ready and shareable</div>
+        <div class="prompt-text">"Set up the project for deployment &mdash; add GitHub repo, push all code, write a comprehensive README, configure auto-launch with VS Code tasks so pressing F5 starts the server and opens the browser automatically. Add architecture documentation and a presentation page."</div>
+        <div class="prompt-result">
+          <strong>Output:</strong> GitHub-hosted repo, one-click launch, full README with setup instructions, architecture docs, presentation page.
+        </div>
+        <div class="prompt-output-tags">
+          <span class="prompt-output-tag">GitHub Repo</span>
+          <span class="prompt-output-tag">One-Click Launch</span>
+          <span class="prompt-output-tag">README</span>
+          <span class="prompt-output-tag">Auto Server</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIVIDER -->
+  <div class="section-divider"></div>
+
+  <!-- PART 2: SETUP GUIDE -->
+  <span class="section-label">Quick Setup</span>
+  <h2 class="section-title">Get HER-AI Running on Your Laptop</h2>
+  <p class="section-sub">No technical background needed. Follow these simple steps and you'll be up and running in under 2 minutes. Everything is free.</p>
+
+  <h4 class="tools-heading">What You'll Need (All Free)</h4>
+  <div class="tools-grid">
+    <div class="tool-card">
+      <div class="tool-icon">🌐</div>
+      <div class="tool-name">A Web Browser</div>
+      <div class="tool-desc">Google Chrome, Edge, or Firefox &mdash; you already have one on your laptop!</div>
+      <div class="tool-tag free">Already on your laptop</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">🐍</div>
+      <div class="tool-name">Python</div>
+      <div class="tool-desc">A small free program. We only use it to open the app &mdash; you don't need to learn Python!</div>
+      <div class="tool-tag free">Free download</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">📁</div>
+      <div class="tool-name">The HER-AI Files</div>
+      <div class="tool-desc">Download as a ZIP file from GitHub &mdash; just like downloading any file from the internet.</div>
+      <div class="tool-tag free">Free download</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">🤖</div>
+      <div class="tool-name">AI Key (Optional)</div>
+      <div class="tool-desc">Want smarter AI responses? Get a free key from Groq. The app works great without it too!</div>
+      <div class="tool-tag optional">Optional</div>
+    </div>
+  </div>
+
+  <h4 class="tools-heading">Follow These Steps</h4>
+  <div class="steps-container">
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">Step 1</span>
+        <span class="step-title">Download the App</span>
+      </div>
+      <div class="step-body">
+        <p>Go to the project page and click the green <strong>"Code"</strong> button, then click <strong>"Download ZIP"</strong>:</p>
+        <div class="step-link">
+          <a href="https://github.com/Gayatri-Kharat/HER-AI" target="_blank" style="color:var(--plum);font-weight:600;text-decoration:underline;">github.com/Gayatri-Kharat/HER-AI</a>
+        </div>
+        <p>Once downloaded, <strong>right-click the ZIP file</strong> and choose <strong>"Extract All"</strong>. Open the extracted folder.</p>
+        <p class="step-alt">It's just like downloading and unzipping any file from the internet!</p>
+      </div>
+    </div>
+
+    <div class="step-arrow">↓</div>
+
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">Step 2</span>
+        <span class="step-title">Install Python (One-Time Only)</span>
+      </div>
+      <div class="step-body">
+        <p>If you don't have Python yet, download it for free:</p>
+        <div class="step-link">
+          <a href="https://www.python.org/downloads/" target="_blank" style="color:var(--plum);font-weight:600;text-decoration:underline;">python.org/downloads</a>
+        </div>
+        <p>Click <strong>"Download Python"</strong> and run the installer. <strong style="color:var(--rose);">Important: Check the box that says "Add Python to PATH"</strong> before clicking Install.</p>
+        <p class="step-alt">You only need to do this once. After that, Python is always ready on your laptop.</p>
+      </div>
+    </div>
+
+    <div class="step-arrow">↓</div>
+
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">Step 3</span>
+        <span class="step-title">Open the App</span>
+      </div>
+      <div class="step-body">
+        <p><strong>On Windows:</strong> Open the HER-AI folder, click the address bar at the top, type <strong>cmd</strong>, and press Enter. This opens a black window.</p>
+        <p><strong>On Mac:</strong> Right-click the HER-AI folder and choose <strong>"Open Terminal here"</strong>.</p>
+        <p>Then type this and press Enter:</p>
+        <div class="step-code">python -m http.server 5500</div>
+        <p class="step-alt">You'll see a message saying "Serving HTTP..." — that means it's working! Keep this window open.</p>
+      </div>
+    </div>
+
+    <div class="step-arrow">↓</div>
+
+    <div class="step-card step-card-highlight">
+      <div class="step-header">
+        <span class="step-num">Step 4</span>
+        <span class="step-title">Start Using HER-AI!</span>
+      </div>
+      <div class="step-body">
+        <p>Open your browser (Chrome, Edge, etc.) and type this in the address bar:</p>
+        <div class="step-code">localhost:5500</div>
+        <p>You'll see the HER-AI landing page! Click <strong>"Launch App"</strong> to open your personal dashboard.</p>
+        <p class="step-alt">Bookmark this page so you can find it easily next time.</p>
+      </div>
+    </div>
+
+    <div class="step-arrow">↓</div>
+
+    <div class="step-card step-card-alt">
+      <div class="step-header">
+        <span class="step-num">Optional</span>
+        <span class="step-title">Turn on Smart AI Chat</span>
+      </div>
+      <div class="step-body">
+        <p>Want the AI chatbot to give personalized, human-like responses? Here's how:</p>
+        <p><strong>1.</strong> Go to <a href="https://console.groq.com" target="_blank" style="color:var(--plum);font-weight:600;">console.groq.com</a> and sign up for free</p>
+        <p><strong>2.</strong> Click <strong>"API Keys"</strong> and create a new key (it's a long text code)</p>
+        <p><strong>3.</strong> In the HER-AI app, go to <strong>Settings</strong> (gear icon in sidebar) and paste the key there</p>
+        <p class="step-alt">Without this, the app still works perfectly &mdash; it just uses simpler built-in responses instead of the AI.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BADGE -->
+  <div class="badge-footer">
+    <h3>Designed for Everyone, Not Just Developers</h3>
+    <p>HER-AI is built with the simplest web technologies &mdash; just like a regular website. No complicated installations, no paid software, no coding knowledge needed. If you can browse the internet, you can run HER-AI.</p>
+    <div class="no-dep-tags">
+      <span class="no-dep-tag yes">✓ Works Offline</span>
+      <span class="no-dep-tag yes">✓ 100% Free</span>
+      <span class="no-dep-tag yes">✓ Under 500KB</span>
+      <span class="no-dep-tag yes">✓ No Account Needed</span>
+      <span class="no-dep-tag yes">✓ Data Stays on Your Laptop</span>
+      <span class="no-dep-tag yes">✓ No Coding Required</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p>AI HER-AI &mdash; The Life Operating System for Women | <a href="index.html">Back to Home</a> | <a href="app.html">Launch App</a></p>
+</footer>
+
+<script>
+var observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if (entry.isIntersecting) entry.target.classList.add('visible');
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.prompt-step').forEach(function(el, i) {
+  el.style.transitionDelay = (i * 0.2) + 's';
+  observer.observe(el);
+});
+</script>
+
+</body>
+</html>

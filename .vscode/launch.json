@@ -4,11 +4,12 @@
         {
             "type": "chrome",
             "request": "launch",
-            "name": "Launch Chrome against localhost",
-            "url": "http://localhost:8080",
+            "name": "Launch HER-AI",
+            "url": "http://localhost:5500",
             "webRoot": "${workspaceFolder}",
             "userDataDir": "${workspaceFolder}/.vscode/.chrome-debug-userdata",
-            "runtimeArgs": ["--remote-debugging-port=9222"]
+            "runtimeArgs": ["--remote-debugging-port=9222"],
+            "preLaunchTask": "Start HTTP Server"
         }
     ]
 }
