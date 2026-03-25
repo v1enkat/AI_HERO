@@ -514,6 +514,38 @@ select {
   border-radius: var(--radius-sm);
 }
 
+/* ========== ENERGY TASK STATES ========== */
+.task-item.energy-recommended {
+  border-left: 3px solid var(--gold);
+  background: rgba(212,168,83,0.06);
+}
+.task-item.energy-dimmed {
+  opacity: 0.5;
+  border-left: 3px solid var(--border);
+}
+.energy-match {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--gold);
+  background: rgba(212,168,83,0.12);
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+  margin-left: 0.4rem;
+  vertical-align: middle;
+}
+.energy-defer {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-light);
+  background: rgba(0,0,0,0.04);
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+  margin-left: 0.4rem;
+  vertical-align: middle;
+}
+
 /* ========== FOCUS TIMER ========== */
 .focus-timer-bar {
   background: linear-gradient(135deg, var(--plum-deep), var(--plum));

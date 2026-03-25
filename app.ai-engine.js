@@ -100,7 +100,7 @@ const AI = {
 
   autoScheduleTasks() {
     const pending = S.tasks.filter(t => !t.done && !t.scheduledTime);
-    if (pending.length === 0) return 'No unscheduled tasks to plan.';
+    if (pending.length === 0) return 'All tasks are already scheduled! ✨';
 
     const hours = [9, 10, 11, 14, 15, 16];
     const highFirst = pending.sort((a, b) => {
@@ -489,7 +489,14 @@ const AI = {
   },
 
   async chatLLM(msg) {
-    const systemPrompt = `You are HER-AI, a warm, supportive AI Life Operating System designed for women. You help with productivity, scheduling, finance, wellness, learning, home management, leadership, and personal branding. Be conversational, empathetic, and actionable like a knowledgeable best friend. Use emojis naturally but not excessively. Keep responses concise (2-4 paragraphs max). Personalize using the user's data when relevant.\n\n${this._getUserContext()}`;
+    const apiKey = this._getApiKey();
+    if (!apiKey) {
+      return this.chat(msg);
+    }
+
+    const userContext = this._getUserContext();
+    const liveData = this._getLiveDataForQuery(msg);
+    const systemPrompt = `You are HER-AI, a warm, supportive AI Life Operating System designed for women. You help with productivity, scheduling, finance, wellness, learning, home management, leadership, and personal branding. Be conversational, empathetic, and actionable like a knowledgeable best friend. Use emojis naturally but not excessively. Keep responses concise (2-4 paragraphs max). Personalize using the user's data when relevant.\n\n${userContext}${liveData ? '\n\nRelevant live data:\n' + liveData : ''}`;
 
     if (!S.chatHistory) S.chatHistory = [];
     S.chatHistory.push({ role: 'user', content: msg });
@@ -501,6 +508,52 @@ const AI = {
     if (S.chatHistory.length > 20) S.chatHistory = S.chatHistory.slice(-20);
 
     return result;
+  },
+
+  _getLiveDataForQuery(msg) {
+    const lower = msg.toLowerCase();
+    const parts = [];
+
+    if (lower.includes('task') || lower.includes('todo') || lower.includes('productivity') || lower.includes('work')) {
+      const pending = S.tasks.filter(t => !t.done);
+      const done = S.tasks.filter(t => t.done);
+      parts.push(`Tasks — ${pending.length} pending, ${done.length} completed. Pending: ${pending.map(t => `${t.text} (${t.priority})`).join(', ') || 'none'}`);
+    }
+
+    if (lower.includes('budget') || lower.includes('money') || lower.includes('spend') || lower.includes('finance') || lower.includes('expense')) {
+      const total = S.expenses.reduce((s, e) => s + e.amount, 0);
+      const remaining = S.finance.income - total;
+      const cats = {};
+      S.expenses.forEach(e => { cats[e.category] = (cats[e.category] || 0) + e.amount; });
+      parts.push(`Finance — Income: ₹${S.finance.income}, Spent: ₹${total}, Remaining: ₹${remaining}. By category: ${Object.entries(cats).map(([k,v]) => `${k}: ₹${v}`).join(', ') || 'no expenses logged'}`);
+    }
+
+    if (lower.includes('mood') || lower.includes('feel') || lower.includes('stress') || lower.includes('wellness')) {
+      const recent = S.moods.slice(-7);
+      parts.push(`Recent moods (last 7): ${recent.map(m => `${m.date}: ${m.mood}`).join(', ') || 'none logged'}`);
+    }
+
+    if (lower.includes('schedule') || lower.includes('plan') || lower.includes('calendar')) {
+      const today = new Date().toISOString().slice(0, 10);
+      const todayEvents = S.events.filter(e => e.date === today);
+      parts.push(`Today's events: ${todayEvents.map(e => `${e.time} - ${e.title}`).join(', ') || 'none scheduled'}`);
+    }
+
+    if (lower.includes('cycle') || lower.includes('period')) {
+      const phase = this.getCyclePhase();
+      parts.push(`Cycle: ${phase.text || 'not set'}, Day ${phase.day || '?'}. ${phase.recs || ''}`);
+    }
+
+    if (lower.includes('grocery') || lower.includes('shopping') || lower.includes('buy')) {
+      const pending = S.groceries.filter(g => !g.bought);
+      parts.push(`Grocery list (${pending.length} items): ${pending.map(g => g.name).join(', ') || 'empty'}`);
+    }
+
+    if (lower.includes('energy')) {
+      parts.push(`Current energy level: ${S.user.energy}`);
+    }
+
+    return parts.join('\n');
   },
 
   async rewriteEmailLLM(text, tone) {

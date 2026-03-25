@@ -43,6 +43,8 @@ const Productivity = {
     S.save();
     document.querySelectorAll('.et-btn').forEach(b => b.classList.toggle('active', b.dataset.level === level));
     document.getElementById('energySuggestion').textContent = AI.getEnergyTip(level);
+    this.render();
+    Dashboard.render();
   },
   autoSchedule() {
     const msg = AI.autoScheduleTasks();
@@ -88,11 +90,29 @@ const Productivity = {
       return;
     }
 
+    const energy = S.user.energy;
+    const recommended = (t) => {
+      if (t.done) return '';
+      if (energy === 'high' && t.priority === 'high') return 'energy-recommended';
+      if (energy === 'medium' && t.priority === 'medium') return 'energy-recommended';
+      if (energy === 'low' && t.priority === 'low') return 'energy-recommended';
+      if (energy === 'low' && t.priority === 'high') return 'energy-dimmed';
+      if (energy === 'high' && t.priority === 'low') return 'energy-dimmed';
+      return '';
+    };
+    const badge = (t) => {
+      if (t.done) return '';
+      const cls = recommended(t);
+      if (cls === 'energy-recommended') return '<span class="energy-match">⚡ Do now</span>';
+      if (cls === 'energy-dimmed') return '<span class="energy-defer">💤 Defer</span>';
+      return '';
+    };
+
     document.getElementById('taskList').innerHTML = tasks.map(t => `
-      <div class="task-item ${t.done ? 'done' : ''}">
+      <div class="task-item ${t.done ? 'done' : ''} ${recommended(t)}">
         <button class="ti-check ${t.done ? 'checked' : ''}" onclick="Productivity.toggle(${t.id})">✓</button>
         <div class="ti-body">
-          <div class="ti-text">${esc(t.text)}</div>
+          <div class="ti-text">${esc(t.text)} ${badge(t)}</div>
           <div class="ti-meta">
             <span class="ti-priority ${t.priority}">${t.priority}</span>
             <span>${t.category}</span>

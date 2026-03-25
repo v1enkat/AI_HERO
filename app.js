@@ -190,7 +190,7 @@ const AI = {
 
   autoScheduleTasks() {
     const pending = S.tasks.filter(t => !t.done && !t.scheduledTime);
-    if (pending.length === 0) return 'No unscheduled tasks to plan.';
+    if (pending.length === 0) return 'All tasks are already scheduled! ✨';
 
     const hours = [9, 10, 11, 14, 15, 16];
     const highFirst = pending.sort((a, b) => {
@@ -926,12 +926,55 @@ const Home = {
     toast('📍 Geo-Reminder added!', 'success');
   },
   dismissGeo() { document.getElementById('geoPopup').style.display = 'none'; },
-  snoozeGeo() { document.getElementById('geoPopup').style.display = 'none'; toast('📍 Will remind again later.', 'info'); },
-  simulateGeo() {
+  snoozeGeo() {
+    document.getElementById('geoPopup').style.display = 'none';
+    this._snoozedUntil = Date.now() + 30 * 60 * 1000;
+    toast('📍 Will remind again in 30 minutes.', 'info');
+  },
+  _lastGeoCheck: null,
+  _snoozedUntil: 0,
+  checkGeoLocation() {
+    if (this._snoozedUntil && Date.now() < this._snoozedUntil) return;
     const active = S.geoReminders.filter(g => !g.dismissed && g.items.length > 0);
-    if (active.length > 0) {
-      const g = active[0];
-      document.getElementById('geoPopupTitle').textContent = `You're near ${g.store}!`;
+    if (active.length === 0) return;
+    if (!navigator.geolocation) { console.warn('Geolocation not supported'); return; }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        this._lastGeoCheck = { lat: latitude, lng: longitude, time: Date.now() };
+        const locationEl = document.getElementById('geoLocationStatus');
+        if (locationEl) locationEl.textContent = `📍 Location: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+        fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&zoom=18&addressdetails=1`)
+          .then(r => r.json())
+          .then(data => {
+            const address = (data.display_name || '').toLowerCase();
+            const nearby = data.address || {};
+            const placeWords = [address, nearby.shop || '', nearby.amenity || '', nearby.building || '', nearby.road || ''].join(' ').toLowerCase();
+            for (const g of active) {
+              const storeLower = g.store.toLowerCase();
+              const categoryKeywords = { grocery: ['grocery','supermarket','market','mart','store','shop','kirana','bazaar','fresh'], medical: ['pharmacy','medical','chemist','drug','apollo','medplus','health'], household: ['hardware','home','household','general store','department'] };
+              const keywords = categoryKeywords[g.category] || [];
+              if (placeWords.includes(storeLower) || keywords.some(kw => placeWords.includes(kw))) {
+                document.getElementById('geoPopupTitle').textContent = `📍 You're near ${g.store}!`;
+                document.getElementById('geoPopupBody').textContent = `Buy: ${g.items.join(', ')}`;
+                document.getElementById('geoPopup').style.display = 'flex';
+                return;
+              }
+            }
+          }).catch(err => console.warn('Geo lookup failed:', err));
+      },
+      (err) => {
+        console.warn('Geolocation error:', err.message);
+        const locationEl = document.getElementById('geoLocationStatus');
+        if (locationEl) locationEl.textContent = `⚠️ Location access denied — enable in browser settings`;
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  },
+  simulateGeoFor(id) {
+    const g = S.geoReminders.find(g => g.id === id);
+    if (g) {
+      document.getElementById('geoPopupTitle').textContent = `📍 You're near ${g.store}!`;
       document.getElementById('geoPopupBody').textContent = `Buy: ${g.items.join(', ')}`;
       document.getElementById('geoPopup').style.display = 'flex';
     }
@@ -986,15 +1029,7 @@ const Home = {
     `).join('');
   },
   removeFamily(id) { S.familyEvents = S.familyEvents.filter(f => f.id !== id); S.save(); this.render(); },
-  removeGeo(id) { S.geoReminders = S.geoReminders.filter(g => g.id !== id); S.save(); this.render(); },
-  simulateGeoFor(id) {
-    const g = S.geoReminders.find(g => g.id === id);
-    if (g) {
-      document.getElementById('geoPopupTitle').textContent = `📍 You're near ${g.store}!`;
-      document.getElementById('geoPopupBody').textContent = `Buy: ${g.items.join(', ')}`;
-      document.getElementById('geoPopup').style.display = 'flex';
-    }
-  }
+  removeGeo(id) { S.geoReminders = S.geoReminders.filter(g => g.id !== id); S.save(); this.render(); }
 };
 
 // ==================== FINANCE ====================
@@ -1426,10 +1461,12 @@ document.addEventListener('DOMContentLoaded', function() {
   // Render dashboard
   Dashboard.render();
 
-  // Geo-reminder simulation (every 5 minutes)
+  if (S.geoReminders.length > 0) {
+    Home.checkGeoLocation();
+  }
   setInterval(function() {
-    if (S.geoReminders.length > 0 && Math.random() > 0.7) {
-      Home.simulateGeo();
+    if (S.geoReminders.length > 0) {
+      Home.checkGeoLocation();
     }
-  }, 5 * 60 * 1000);
+  }, 3 * 60 * 1000);
 });

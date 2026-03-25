@@ -98,12 +98,70 @@ const Home = {
     toast('📍 Geo-Reminder added!', 'success');
   },
   dismissGeo() { document.getElementById('geoPopup').style.display = 'none'; },
-  snoozeGeo() { document.getElementById('geoPopup').style.display = 'none'; toast('📍 Will remind again later.', 'info'); },
-  simulateGeo() {
+  snoozeGeo() {
+    document.getElementById('geoPopup').style.display = 'none';
+    this._snoozedUntil = Date.now() + 30 * 60 * 1000;
+    toast('📍 Will remind again in 30 minutes.', 'info');
+  },
+  _lastGeoCheck: null,
+  _snoozedUntil: 0,
+  checkGeoLocation() {
+    if (this._snoozedUntil && Date.now() < this._snoozedUntil) return;
     const active = S.geoReminders.filter(g => !g.dismissed && g.items.length > 0);
-    if (active.length > 0) {
-      const g = active[0];
-      document.getElementById('geoPopupTitle').textContent = `You're near ${g.store}!`;
+    if (active.length === 0) return;
+
+    if (!navigator.geolocation) {
+      console.warn('Geolocation not supported');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        this._lastGeoCheck = { lat: latitude, lng: longitude, time: Date.now() };
+
+        const locationEl = document.getElementById('geoLocationStatus');
+        if (locationEl) locationEl.textContent = `📍 Location: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+
+        fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&zoom=18&addressdetails=1`)
+          .then(r => r.json())
+          .then(data => {
+            const address = (data.display_name || '').toLowerCase();
+            const nearby = data.address || {};
+            const placeWords = [address, nearby.shop || '', nearby.amenity || '', nearby.building || '', nearby.road || ''].join(' ').toLowerCase();
+
+            for (const g of active) {
+              const storeLower = g.store.toLowerCase();
+              const categoryKeywords = {
+                grocery: ['grocery', 'supermarket', 'market', 'mart', 'store', 'shop', 'kirana', 'bazaar', 'fresh'],
+                medical: ['pharmacy', 'medical', 'chemist', 'drug', 'apollo', 'medplus', 'health'],
+                household: ['hardware', 'home', 'household', 'general store', 'department']
+              };
+              const keywords = categoryKeywords[g.category] || [];
+              const isNearMatch = placeWords.includes(storeLower) || keywords.some(kw => placeWords.includes(kw));
+
+              if (isNearMatch) {
+                document.getElementById('geoPopupTitle').textContent = `📍 You're near ${g.store}!`;
+                document.getElementById('geoPopupBody').textContent = `Buy: ${g.items.join(', ')}`;
+                document.getElementById('geoPopup').style.display = 'flex';
+                return;
+              }
+            }
+          })
+          .catch(err => console.warn('Geo lookup failed:', err));
+      },
+      (err) => {
+        console.warn('Geolocation error:', err.message);
+        const locationEl = document.getElementById('geoLocationStatus');
+        if (locationEl) locationEl.textContent = `⚠️ Location access denied — enable in browser settings`;
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  },
+  simulateGeoFor(id) {
+    const g = S.geoReminders.find(g => g.id === id);
+    if (g) {
+      document.getElementById('geoPopupTitle').textContent = `📍 You're near ${g.store}!`;
       document.getElementById('geoPopupBody').textContent = `Buy: ${g.items.join(', ')}`;
       document.getElementById('geoPopup').style.display = 'flex';
     }
@@ -144,23 +202,22 @@ const Home = {
       `).join('');
     }
 
-    document.getElementById('geoList').innerHTML = S.geoReminders.map(g => `
-      <div class="geo-reminder-item">
-        <span>📍</span>
-        <span style="flex:1"><strong>${esc(g.store)}</strong> (${g.category}) ${g.favorite ? '⭐' : ''}<br><small>${g.items.join(', ')}</small></span>
-        <button class="btn btn-sm" onclick="Home.simulateGeoFor(${g.id})">Test</button>
-        <button class="gi-remove" onclick="Home.removeGeo(${g.id})">×</button>
-      </div>
-    `).join('');
+    const geoStatusText = this._lastGeoCheck
+      ? `📍 Location: ${this._lastGeoCheck.lat.toFixed(4)}, ${this._lastGeoCheck.lng.toFixed(4)}`
+      : '📍 Waiting for location...';
+    document.getElementById('geoList').innerHTML = `
+      <div id="geoLocationStatus" style="font-size:0.8rem;color:var(--text-light);margin-bottom:0.5rem;">${geoStatusText}</div>
+    ` + (S.geoReminders.length === 0
+      ? '<div class="empty-state"><div class="empty-icon">📍</div><div class="empty-text">No geo-reminders. Add a store to get notified when nearby!</div></div>'
+      : S.geoReminders.map(g => `
+        <div class="geo-reminder-item">
+          <span>📍</span>
+          <span style="flex:1"><strong>${esc(g.store)}</strong> (${g.category}) ${g.favorite ? '⭐' : ''}<br><small>${g.items.join(', ')}</small></span>
+          <button class="btn btn-sm" onclick="Home.simulateGeoFor(${g.id})">Test</button>
+          <button class="gi-remove" onclick="Home.removeGeo(${g.id})">×</button>
+        </div>
+      `).join(''));
   },
   removeFamily(id) { S.familyEvents = S.familyEvents.filter(f => f.id !== id); S.save(); this.render(); },
-  removeGeo(id) { S.geoReminders = S.geoReminders.filter(g => g.id !== id); S.save(); this.render(); },
-  simulateGeoFor(id) {
-    const g = S.geoReminders.find(g => g.id === id);
-    if (g) {
-      document.getElementById('geoPopupTitle').textContent = `📍 You're near ${g.store}!`;
-      document.getElementById('geoPopupBody').textContent = `Buy: ${g.items.join(', ')}`;
-      document.getElementById('geoPopup').style.display = 'flex';
-    }
-  }
+  removeGeo(id) { S.geoReminders = S.geoReminders.filter(g => g.id !== id); S.save(); this.render(); }
 };

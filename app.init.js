@@ -19,9 +19,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
   Dashboard.render();
 
+  if (S.geoReminders.length > 0) {
+    Home.checkGeoLocation();
+  }
   setInterval(function() {
-    if (S.geoReminders.length > 0 && Math.random() > 0.7) {
-      Home.simulateGeo();
+    if (S.geoReminders.length > 0) {
+      Home.checkGeoLocation();
     }
-  }, 5 * 60 * 1000);
+  }, 3 * 60 * 1000);
 });

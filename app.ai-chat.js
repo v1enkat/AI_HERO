@@ -21,10 +21,9 @@ const AIChat = {
         thinkingEl.querySelector('.cm-text').classList.remove('typing-indicator');
       }
     } catch (e) {
-      const fallback = AI.chat(msg);
       const thinkingEl = document.getElementById(thinkingId);
       if (thinkingEl) {
-        thinkingEl.querySelector('.cm-text').innerHTML = fallback.replace(/\n/g, '<br>');
+        thinkingEl.querySelector('.cm-text').innerHTML = '⚠️ Could not reach the AI service. Please check your API key in Settings.';
         thinkingEl.querySelector('.cm-text').classList.remove('typing-indicator');
       }
     }
