@@ -8,6 +8,13 @@ function S() {
   return useHerAIStore.getState();
 }
 
+/** Monthly salary + logged side income — use for budget % and remaining everywhere. */
+function totalBudgetIncome(): number {
+  const st = S();
+  const side = (st.sideIncomes ?? []).reduce((s, e) => s + e.amount, 0);
+  return (st.finance.income || 0) + side;
+}
+
 export function getGreeting(): string {
   const h = new Date().getHours();
   if (h < 12) return 'Good morning';
@@ -96,7 +103,8 @@ export function getDashInsight(): string {
     );
   if (st.expenses.length > 3) {
     const total = st.expenses.reduce((s, e) => s + e.amount, 0);
-    if (st.finance.income > 0 && total > st.finance.income * 0.7)
+    const tin = totalBudgetIncome();
+    if (tin > 0 && total > tin * 0.7)
       insights.push("⚠️ You've spent over 70% of your income. Consider reviewing expenses.");
   }
 
@@ -358,10 +366,11 @@ function userContextString(): string {
   const st = S();
   const pending = st.tasks.filter((t) => !t.done);
   const totalSpent = st.expenses.reduce((s, e) => s + e.amount, 0);
+  const tin = totalBudgetIncome();
   const phase = getCyclePhase();
   return `User context — Name: ${st.user.name || 'User'}, Energy: ${st.user.energy}, Pending tasks: ${
     pending.length
-  }, Skills tracking: ${st.skills.length}, Budget: income ₹${st.finance.income} / spent ₹${totalSpent}, Cycle phase: ${
+  }, Skills tracking: ${st.skills.length}, Budget: total income ₹${tin} (salary ₹${st.finance.income} + side ₹${tin - st.finance.income}) / spent ₹${totalSpent}, Cycle phase: ${
     phase.text || 'not set'
   }, Recent moods: ${st.moods.slice(-3).map((m) => m.mood).join(', ') || 'none logged'}.`;
 }
@@ -425,13 +434,14 @@ function liveDataForQuery(msg: string): string {
     lower.includes('expense')
   ) {
     const total = st.expenses.reduce((s, e) => s + e.amount, 0);
-    const remaining = st.finance.income - total;
+    const tin = totalBudgetIncome();
+    const remaining = tin - total;
     const cats: Record<string, number> = {};
     st.expenses.forEach((e) => {
       cats[e.category] = (cats[e.category] || 0) + e.amount;
     });
     parts.push(
-      `Finance — Income: ₹${st.finance.income}, Spent: ₹${total}, Remaining: ₹${remaining}. By category: ${
+      `Finance — Total income: ₹${tin} (salary ₹${st.finance.income}), Spent: ₹${total}, Remaining: ₹${remaining}. By category: ${
         Object.entries(cats)
           .map(([k, v]) => `${k}: ₹${v}`)
           .join(', ') || 'no expenses logged'
@@ -496,12 +506,14 @@ export function chatRuleBased(msg: string): string {
     lower.includes('expense')
   ) {
     const total = st.expenses.reduce((s, e) => s + e.amount, 0);
-    const remaining = st.finance.income - total;
-    if (st.finance.income === 0)
-      return "You haven't set your monthly income yet. Go to Finance → Set Income to get started with budgeting!";
-    return `💰 Financial Summary:\n• Monthly Income: ₹${st.finance.income.toLocaleString()}\n• Spent: ₹${total.toLocaleString()}\n• Remaining: ₹${remaining.toLocaleString()}\n\n${
-      total > st.finance.income * 0.8
-        ? "⚠️ You're spending over 80% of income. Review your expenses!"
+    const tin = totalBudgetIncome();
+    const remaining = tin - total;
+    const sideSum = tin - st.finance.income;
+    if (tin === 0)
+      return "You haven't set your monthly income (or added side earnings) yet. Go to Finance → Set Income or Add side earning to get started with budgeting!";
+    return `💰 Financial Summary:\n• Total income: ₹${tin.toLocaleString()} (salary ₹${st.finance.income.toLocaleString()}${sideSum > 0 ? ` + side ₹${sideSum.toLocaleString()}` : ''})\n• Spent: ₹${total.toLocaleString()}\n• Remaining: ₹${remaining.toLocaleString()}\n\n${
+      total > tin * 0.8
+        ? "⚠️ You're spending over 80% of total income. Review your expenses!"
         : '✅ Your spending is within budget. Keep it up!'
     }`;
   }

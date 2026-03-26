@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Modal } from '../../components/ui/Modal';
 import { useHerAIStore } from '../../store/useHerAIStore';
+import { calendarDateKey } from '../../utils/calendarDate';
 
 const catIcons: Record<string, string> = {
   Food: '🍽️',
@@ -15,12 +16,16 @@ const catIcons: Record<string, string> = {
 
 export function FinancePage() {
   const expenses = useHerAIStore((s) => s.expenses);
+  const sideIncomes = useHerAIStore((s) => s.sideIncomes);
   const finance = useHerAIStore((s) => s.finance);
   const addExpense = useHerAIStore((s) => s.addExpense);
   const removeExpense = useHerAIStore((s) => s.removeExpense);
+  const addSideIncome = useHerAIStore((s) => s.addSideIncome);
+  const removeSideIncome = useHerAIStore((s) => s.removeSideIncome);
   const setFinance = useHerAIStore((s) => s.setFinance);
 
   const [expModal, setExpModal] = useState(false);
+  const [sideModal, setSideModal] = useState(false);
   const [incModal, setIncModal] = useState(false);
   const [tipsOpen, setTipsOpen] = useState(false);
   const [tipsHtml, setTipsHtml] = useState('');
@@ -28,12 +33,17 @@ export function FinancePage() {
   const [amount, setAmount] = useState('');
   const [desc, setDesc] = useState('');
   const [cat, setCat] = useState('Food');
+  const [sideAmount, setSideAmount] = useState('');
+  const [sideDesc, setSideDesc] = useState('');
   const [incomeIn, setIncomeIn] = useState(String(finance.income || ''));
   const [savingsIn, setSavingsIn] = useState(String(finance.savingsGoal || ''));
 
-  const total = expenses.reduce((s, e) => s + e.amount, 0);
-  const remaining = finance.income - total;
-  const pct = finance.income > 0 ? Math.min(100, (total / finance.income) * 100) : 0;
+  const monthlyIncome = finance.income || 0;
+  const sideIncomeTotal = sideIncomes.reduce((s, e) => s + e.amount, 0);
+  const totalIncome = monthlyIncome + sideIncomeTotal;
+  const totalSpent = expenses.reduce((s, e) => s + e.amount, 0);
+  const remaining = totalIncome - totalSpent;
+  const pct = totalIncome > 0 ? Math.min(100, (totalSpent / totalIncome) * 100) : 0;
 
   const cats: Record<string, number> = {};
   expenses.forEach((e) => {
@@ -42,21 +52,25 @@ export function FinancePage() {
 
   const aiAdvice = () => {
     let tips = '<strong>🧠 AI Financial Analysis:</strong><br><br>';
-    if (finance.income === 0) {
-      tips += '⚠️ Set your monthly income first to get budgeting insights.';
+    if (totalIncome === 0) {
+      tips +=
+        '⚠️ Set your monthly income and/or add side earnings first to get budgeting insights.';
     } else {
-      const p = ((total / finance.income) * 100).toFixed(0);
-      tips += `You've spent ₹${total.toLocaleString()} (${p}% of income) this month.<br><br>`;
+      const p = ((totalSpent / totalIncome) * 100).toFixed(0);
+      tips += `You've spent ₹${totalSpent.toLocaleString()} (${p}% of <strong>total income</strong> ₹${totalIncome.toLocaleString()}) this period.<br><br>`;
+      if (sideIncomeTotal > 0) {
+        tips += `📥 Side / extra income: ₹${sideIncomeTotal.toLocaleString()} (on top of salary ₹${monthlyIncome.toLocaleString()})<br><br>`;
+      }
       const top = Object.entries(cats).sort((a, b) => b[1] - a[1])[0];
       if (top) tips += `📊 Highest spending: <strong>${top[0]}</strong> at ₹${top[1].toLocaleString()}<br><br>`;
-      if (total > finance.income * 0.8)
-        tips += "🚨 <strong>Alert:</strong> You're over 80% spent. Cut back on non-essentials.<br>";
-      if (total < finance.income * 0.5)
+      if (totalSpent > totalIncome * 0.8)
+        tips += "🚨 <strong>Alert:</strong> You're over 80% spent vs total income. Cut back on non-essentials.<br>";
+      if (totalSpent < totalIncome * 0.5)
         tips += '✅ Great budgeting! You have room for savings or investments.<br>';
       tips +=
         '<br>💡 <strong>Micro-investment tip:</strong> Even ₹500/month in a SIP can compound meaningfully over years.';
       if (finance.savingsGoal > 0) {
-        const saveable = finance.income - total;
+        const saveable = totalIncome - totalSpent;
         tips += `<br><br>🎯 Savings goal: ₹${finance.savingsGoal.toLocaleString()} | Saveable: ₹${saveable.toLocaleString()} ${
           saveable >= finance.savingsGoal ? '✅ On track!' : '⚠️ Tighten spending'
         }`;
@@ -73,11 +87,24 @@ export function FinancePage() {
       amount: a,
       desc: desc.trim() || 'Expense',
       category: cat,
-      date: new Date().toISOString().slice(0, 10),
+      date: calendarDateKey(),
     });
     setExpModal(false);
     setAmount('');
     setDesc('');
+  };
+
+  const submitSideIncome = () => {
+    const a = parseFloat(sideAmount);
+    if (!a || a <= 0) return;
+    addSideIncome({
+      amount: a,
+      desc: sideDesc.trim() || 'Side income',
+      date: calendarDateKey(),
+    });
+    setSideModal(false);
+    setSideAmount('');
+    setSideDesc('');
   };
 
   const submitIncome = () => {
@@ -104,6 +131,9 @@ export function FinancePage() {
         <button type="button" className="btn btn-primary" onClick={() => setExpModal(true)}>
           + Log Expense
         </button>
+        <button type="button" className="btn btn-primary" onClick={() => setSideModal(true)}>
+          + Add side earning
+        </button>
         <button type="button" className="btn btn-ghost" onClick={() => setIncModal(true)}>
           💵 Set Income
         </button>
@@ -114,19 +144,28 @@ export function FinancePage() {
 
       <div className="finance-stats">
         <div className="fs-card income">
-          <div className="fs-label">Monthly Income</div>
-          <div className="fs-value">₹{finance.income.toLocaleString()}</div>
+          <div className="fs-label">Monthly income (salary)</div>
+          <div className="fs-value">₹{monthlyIncome.toLocaleString()}</div>
+        </div>
+        <div className="fs-card side-income">
+          <div className="fs-label">Side / extra earned</div>
+          <div className="fs-value">₹{sideIncomeTotal.toLocaleString()}</div>
+        </div>
+        <div className="fs-card total-income">
+          <div className="fs-label">Total income</div>
+          <div className="fs-value">₹{totalIncome.toLocaleString()}</div>
+          <div className="fs-hint">Salary + side earnings — used for budget</div>
         </div>
         <div className="fs-card spent">
-          <div className="fs-label">Spent This Month</div>
-          <div className="fs-value">₹{total.toLocaleString()}</div>
+          <div className="fs-label">Spent (all logged)</div>
+          <div className="fs-value">₹{totalSpent.toLocaleString()}</div>
         </div>
         <div className="fs-card remaining">
           <div className="fs-label">Remaining</div>
           <div className="fs-value">₹{remaining.toLocaleString()}</div>
         </div>
         <div className="fs-card savings">
-          <div className="fs-label">Savings Goal</div>
+          <div className="fs-label">Savings goal</div>
           <div className="fs-value">₹{finance.savingsGoal.toLocaleString()}</div>
         </div>
       </div>
@@ -148,6 +187,27 @@ export function FinancePage() {
           </div>
         ))}
       </div>
+
+      {sideIncomes.length > 0 && (
+        <div className="side-income-section">
+          <h3 className="sis-title">Side earnings</h3>
+          <div className="side-income-list">
+            {[...sideIncomes].reverse().map((e) => (
+              <div key={e.id} className="side-income-item">
+                <span className="sii-icon">📥</span>
+                <div className="sii-info">
+                  <div className="sii-name">{e.desc}</div>
+                  <div className="sii-date">{e.date}</div>
+                </div>
+                <div className="sii-amount">+₹{e.amount.toLocaleString()}</div>
+                <button type="button" className="sii-delete" onClick={() => removeSideIncome(e.id)} aria-label="Remove">
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="expense-list" id="expenseList">
         {expenses.length === 0 ? (
@@ -202,6 +262,25 @@ export function FinancePage() {
         </select>
         <button type="button" className="btn btn-primary" onClick={submitExpense}>
           Log Expense
+        </button>
+      </Modal>
+
+      <Modal open={sideModal} title="Add side earning" onClose={() => setSideModal(false)}>
+        <p className="muted small" style={{ marginBottom: '0.75rem' }}>
+          Extra money on top of your monthly salary (freelance, gift, refund, etc.). This increases your total income
+          for remaining balance and budget %.
+        </p>
+        <label htmlFor="sa">Amount (₹)</label>
+        <input id="sa" type="number" min={0} step="0.01" value={sideAmount} onChange={(e) => setSideAmount(e.target.value)} />
+        <label htmlFor="sd">Description (where it came from)</label>
+        <input
+          id="sd"
+          placeholder="e.g. Freelance project, birthday gift, sold item…"
+          value={sideDesc}
+          onChange={(e) => setSideDesc(e.target.value)}
+        />
+        <button type="button" className="btn btn-primary" onClick={submitSideIncome}>
+          Add to total income
         </button>
       </Modal>
 

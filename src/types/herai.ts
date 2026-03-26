@@ -33,6 +33,14 @@ export interface Expense {
   date: string;
 }
 
+/** Extra earnings on top of monthly salary (freelance, gifts, etc.). */
+export interface SideIncomeEntry {
+  id: number;
+  amount: number;
+  desc: string;
+  date: string;
+}
+
 export interface MoodEntry {
   date: string;
   mood: string;

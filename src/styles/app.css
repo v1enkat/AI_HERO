@@ -1199,7 +1199,7 @@ select {
 /* ========== FINANCE ========== */
 .finance-stats {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
   gap: clamp(0.75rem, 2vw, 1.25rem);
   margin-bottom: 1.5rem;
   width: 100%;
@@ -1217,9 +1217,45 @@ select {
 .fs-value { font-family: inherit; font-size: 1.3rem; font-weight: 800; }
 
 .fs-card.income .fs-value { color: var(--mint); }
+.fs-card.side-income .fs-value { color: #5ab0c4; }
+.fs-card.total-income {
+  border-color: rgba(126, 206, 193, 0.45);
+  background: linear-gradient(145deg, rgba(126, 206, 193, 0.12), var(--card));
+}
+.fs-card.total-income .fs-value { color: var(--plum); font-size: 1.45rem; }
+.fs-hint {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-top: 0.35rem;
+  line-height: 1.35;
+}
 .fs-card.spent .fs-value { color: var(--rose); }
 .fs-card.remaining .fs-value { color: var(--gold); }
 .fs-card.savings .fs-value { color: var(--sky); }
+
+.side-income-section { margin-bottom: 1.25rem; }
+.sis-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--plum);
+  margin-bottom: 0.5rem;
+}
+.side-income-list { display: flex; flex-direction: column; gap: 0.4rem; }
+.side-income-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.8rem 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.sii-icon { font-size: 1.3rem; }
+.sii-info { flex: 1; }
+.sii-name { font-size: 0.88rem; font-weight: 500; }
+.sii-date { font-size: 0.72rem; color: var(--text-muted); }
+.sii-amount { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--mint); }
+.sii-delete { background: none; border: none; cursor: pointer; color: var(--text-muted); }
 
 .budget-visual {
   background: var(--card);

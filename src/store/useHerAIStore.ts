@@ -5,6 +5,7 @@ import type {
   CalendarEvent,
   GroceryItem,
   Expense,
+  SideIncomeEntry,
   MoodEntry,
   SleepEntry,
   GeoReminder,
@@ -23,6 +24,7 @@ export interface HerAIPersisted {
   events: CalendarEvent[];
   groceries: GroceryItem[];
   expenses: Expense[];
+  sideIncomes: SideIncomeEntry[];
   mealPlan: { day: string; breakfast: string; lunch: string; dinner: string }[];
   familyEvents: FamilyEvent[];
   geoReminders: GeoReminder[];
@@ -55,6 +57,8 @@ export type HerAIStore = HerAIPersisted & {
   patchTasks: (fn: (tasks: Task[]) => Task[]) => void;
   addExpense: (e: Omit<Expense, 'id'>) => void;
   removeExpense: (id: number) => void;
+  addSideIncome: (e: Omit<SideIncomeEntry, 'id'>) => void;
+  removeSideIncome: (id: number) => void;
   setFinance: (partial: Partial<HerAIPersisted['finance']>) => void;
   addEvent: (e: Omit<CalendarEvent, 'id'>) => void;
   removeEvent: (id: number) => void;
@@ -189,6 +193,7 @@ const initial: HerAIPersisted = {
   events: [],
   groceries: [],
   expenses: [],
+  sideIncomes: [],
   mealPlan: [],
   familyEvents: [],
   geoReminders: [],
@@ -232,6 +237,12 @@ export const useHerAIStore = create<HerAIStore>()(
       patchTasks: (fn) => set((s) => ({ tasks: fn(s.tasks) })),
       addExpense: (e) => set((s) => ({ expenses: [...s.expenses, { ...e, id: Date.now() }] })),
       removeExpense: (id) => set((s) => ({ expenses: s.expenses.filter((x) => x.id !== id) })),
+      addSideIncome: (e) =>
+        set((s) => ({
+          sideIncomes: [...(s.sideIncomes ?? []), { ...e, id: Date.now() }],
+        })),
+      removeSideIncome: (id) =>
+        set((s) => ({ sideIncomes: (s.sideIncomes ?? []).filter((x) => x.id !== id) })),
       setFinance: (partial) =>
         set((s) => ({ finance: { ...s.finance, ...partial } })),
       addEvent: (e) =>
@@ -372,6 +383,7 @@ export const useHerAIStore = create<HerAIStore>()(
         events: s.events,
         groceries: s.groceries,
         expenses: s.expenses,
+        sideIncomes: s.sideIncomes,
         mealPlan: s.mealPlan,
         familyEvents: s.familyEvents,
         geoReminders: s.geoReminders,

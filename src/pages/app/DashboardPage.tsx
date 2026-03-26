@@ -20,6 +20,7 @@ export function DashboardPage() {
   const userName = useHerAIStore((s) => s.user.name);
   const tasks = useHerAIStore((s) => s.tasks);
   const expenses = useHerAIStore((s) => s.expenses);
+  const sideIncomes = useHerAIStore((s) => s.sideIncomes);
   const finance = useHerAIStore((s) => s.finance);
   const moods = useHerAIStore((s) => s.moods);
   const events = useHerAIStore((s) => s.events);
@@ -29,7 +30,9 @@ export function DashboardPage() {
   const done = tasks.filter((t) => t.done).length;
   const pending = tasks.filter((t) => !t.done).length;
   const spent = expenses.reduce((s, e) => s + e.amount, 0);
-  const remaining = finance.income - spent;
+  const sideSum = sideIncomes.reduce((s, e) => s + e.amount, 0);
+  const totalIncome = (finance.income || 0) + sideSum;
+  const remaining = totalIncome - spent;
   const today = calendarDateKey();
   const moodToday = moods.find((m) => m.date === today);
   const wellnessDisplay = moodToday ? moodEmoji[moodToday.mood] ?? '--' : '--';
