@@ -15,6 +15,7 @@ import type {
   EnergyLevel,
   InstructorTopicKey,
 } from '../types/herai';
+import { calendarDateKey } from '../utils/calendarDate';
 
 export interface HerAIPersisted {
   user: { name: string; energy: EnergyLevel; learningStyle: string };
@@ -36,6 +37,15 @@ export interface HerAIPersisted {
   instructorTopic: InstructorTopicKey;
   instructorWeek: number;
   schedulerOffset: number;
+  /** Daily count of break tasks marked Done (resets by calendar day). Toggle only affects 45-min reminders. */
+  wellnessBreakReminders: { enabled: boolean; dayKey: string; validBreaksCount: number };
+  /**
+   * Authoritative count for wellness scoring (Done on break tasks). Separate from `wellnessBreakReminders`
+   * so persist/rehydration cannot drop updates tied to the reminder toggle object.
+   */
+  wellnessBreakTaskCount: { dateKey: string; count: number };
+  /** User-defined ideas for what to do during break reminders. */
+  breakActivities: string[];
 }
 
 export type HerAIStore = HerAIPersisted & {
@@ -69,6 +79,108 @@ export type HerAIStore = HerAIPersisted & {
   setInstructorTopic: (t: InstructorTopicKey) => void;
   setInstructorWeek: (w: number) => void;
   resetAll: () => void;
+  setWellnessBreakRemindersEnabled: (enabled: boolean) => void;
+  incrementWellnessValidBreak: () => void;
+  /** One atomic update: count a completed break task and remove it from the list. */
+  completeBreakActivityAt: (index: number) => void;
+  addBreakActivity: (text: string) => void;
+  removeBreakActivity: (index: number) => void;
+}
+
+/** Avoid losing in-memory break completions when persist rehydration finishes after the user taps Done. */
+function mergeWellnessBreakReminders(
+  persisted: Partial<HerAIPersisted>['wellnessBreakReminders'] | undefined,
+  current: HerAIPersisted['wellnessBreakReminders'],
+  today: string
+): HerAIPersisted['wellnessBreakReminders'] {
+  if (persisted == null) return current;
+  const wP = persisted;
+  const wC = current;
+  const pForToday = wP.dayKey === today ? Number(wP.validBreaksCount) || 0 : 0;
+  const cForToday = wC.dayKey === today ? Number(wC.validBreaksCount) || 0 : 0;
+  const maxToday = Math.max(pForToday, cForToday);
+  if (wP.dayKey === today || wC.dayKey === today) {
+    return {
+      ...wP,
+      ...wC,
+      dayKey: today,
+      validBreaksCount: maxToday,
+    };
+  }
+  return { ...wC, ...wP };
+}
+
+/** Merge mood logs by date; in-memory `current` wins on duplicate dates (fixes persist rehydration racing mood taps). */
+function mergeMoodEntries(persisted: MoodEntry[] | undefined, current: MoodEntry[]): MoodEntry[] {
+  const map = new Map<string, string>();
+  if (persisted) {
+    for (const e of persisted) {
+      map.set(e.date, e.mood);
+    }
+  }
+  for (const e of current) {
+    map.set(e.date, e.mood);
+  }
+  return Array.from(map.entries())
+    .map(([date, mood]) => ({ date, mood }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+function mergeBreakTaskCount(
+  persisted: Partial<HerAIPersisted>['wellnessBreakTaskCount'] | undefined,
+  current: HerAIPersisted['wellnessBreakTaskCount'],
+  today: string,
+  legacyReminders: Partial<HerAIPersisted>['wellnessBreakReminders'] | undefined
+): HerAIPersisted['wellnessBreakTaskCount'] {
+  let p = persisted;
+  if (p == null && legacyReminders?.dayKey === today) {
+    const n = Number(legacyReminders.validBreaksCount) || 0;
+    if (n > 0) p = { dateKey: today, count: n };
+  }
+  if (p == null) return current;
+  const wP = p;
+  const wC = current;
+  const pToday = wP.dateKey === today ? Number(wP.count) || 0 : 0;
+  const cToday = wC.dateKey === today ? Number(wC.count) || 0 : 0;
+  const maxToday = Math.max(pToday, cToday);
+  if (wP.dateKey === today || wC.dateKey === today) {
+    return { dateKey: today, count: maxToday };
+  }
+  return { ...wC, ...wP };
+}
+
+function mergePersistedState(persisted: unknown, current: HerAIStore): HerAIStore {
+  const p = (persisted as Partial<HerAIPersisted> | null | undefined) ?? {};
+  const today = calendarDateKey();
+  const breakTaskCount = mergeBreakTaskCount(
+    p.wellnessBreakTaskCount,
+    current.wellnessBreakTaskCount,
+    today,
+    p.wellnessBreakReminders
+  );
+  const wrMerged = mergeWellnessBreakReminders(
+    p.wellnessBreakReminders,
+    current.wellnessBreakReminders,
+    today
+  );
+  const wrSynced =
+    breakTaskCount.dateKey === today
+      ? {
+          ...wrMerged,
+          dayKey: today,
+          validBreaksCount: Math.max(
+            wrMerged.dayKey === today ? Number(wrMerged.validBreaksCount) || 0 : 0,
+            breakTaskCount.count
+          ),
+        }
+      : wrMerged;
+  return {
+    ...current,
+    ...p,
+    moods: mergeMoodEntries(p.moods, current.moods),
+    wellnessBreakTaskCount: breakTaskCount,
+    wellnessBreakReminders: wrSynced,
+  };
 }
 
 const initial: HerAIPersisted = {
@@ -91,6 +203,9 @@ const initial: HerAIPersisted = {
   instructorTopic: null,
   instructorWeek: 0,
   schedulerOffset: 0,
+  wellnessBreakReminders: { enabled: false, dayKey: '', validBreaksCount: 0 },
+  wellnessBreakTaskCount: { dateKey: '', count: 0 },
+  breakActivities: [],
 };
 
 export const useHerAIStore = create<HerAIStore>()(
@@ -156,7 +271,7 @@ export const useHerAIStore = create<HerAIStore>()(
           geoReminders: s.geoReminders.filter((x) => x.id !== id),
         })),
       logMood: (mood) => {
-        const today = new Date().toISOString().slice(0, 10);
+        const today = calendarDateKey();
         set((s) => {
           const moods = [...s.moods];
           const i = moods.findIndex((m) => m.date === today);
@@ -168,9 +283,11 @@ export const useHerAIStore = create<HerAIStore>()(
       setCycle: (partial) =>
         set((s) => ({ cycle: { ...s.cycle, ...partial } })),
       addSleep: (hours, quality) => {
-        const date = new Date().toISOString().slice(0, 10);
+        const date = calendarDateKey();
+        const h = Number(hours);
+        if (!Number.isFinite(h) || h <= 0) return;
         set((s) => ({
-          sleepLog: [...s.sleepLog, { date, hours, quality }],
+          sleepLog: [...s.sleepLog.filter((e) => e.date !== date), { date, hours: h, quality }],
         }));
       },
       addWin: (text, date) =>
@@ -190,6 +307,57 @@ export const useHerAIStore = create<HerAIStore>()(
         })),
       setInstructorTopic: (t) => set({ instructorTopic: t }),
       setInstructorWeek: (w) => set({ instructorWeek: w }),
+      setWellnessBreakRemindersEnabled: (enabled) =>
+        set((s) => ({
+          wellnessBreakReminders: { ...s.wellnessBreakReminders, enabled },
+        })),
+      incrementWellnessValidBreak: () =>
+        set((s) => {
+          const today = calendarDateKey();
+          const w = s.wellnessBreakReminders;
+          const btc = s.wellnessBreakTaskCount ?? { dateKey: '', count: 0 };
+          const fromBr = w.dayKey === today ? Number(w.validBreaksCount) || 0 : 0;
+          const fromBtc = btc.dateKey === today ? Number(btc.count) || 0 : 0;
+          const next = Math.max(fromBr, fromBtc) + 1;
+          return {
+            wellnessBreakReminders: {
+              ...w,
+              dayKey: today,
+              validBreaksCount: next,
+            },
+            wellnessBreakTaskCount: { dateKey: today, count: next },
+          };
+        }),
+      addBreakActivity: (text) => {
+        const t = text.trim().slice(0, 200);
+        if (!t) return;
+        set((s) => ({
+          breakActivities: [...s.breakActivities, t].slice(0, 40),
+        }));
+      },
+      removeBreakActivity: (index) =>
+        set((s) => ({
+          breakActivities: s.breakActivities.filter((_, i) => i !== index),
+        })),
+      completeBreakActivityAt: (index) =>
+        set((s) => {
+          if (index < 0 || index >= s.breakActivities.length) return {};
+          const today = calendarDateKey();
+          const w = s.wellnessBreakReminders;
+          const btc = s.wellnessBreakTaskCount ?? { dateKey: '', count: 0 };
+          const fromBr = w.dayKey === today ? Number(w.validBreaksCount) || 0 : 0;
+          const fromBtc = btc.dateKey === today ? Number(btc.count) || 0 : 0;
+          const next = Math.max(fromBr, fromBtc) + 1;
+          return {
+            wellnessBreakTaskCount: { dateKey: today, count: next },
+            wellnessBreakReminders: {
+              ...w,
+              dayKey: today,
+              validBreaksCount: next,
+            },
+            breakActivities: s.breakActivities.filter((_, i) => i !== index),
+          };
+        }),
       resetAll: () => {
         localStorage.removeItem('herai_data');
         set({ ...initial });
@@ -218,11 +386,11 @@ export const useHerAIStore = create<HerAIStore>()(
         instructorTopic: s.instructorTopic,
         instructorWeek: s.instructorWeek,
         schedulerOffset: s.schedulerOffset,
+        wellnessBreakReminders: s.wellnessBreakReminders,
+        wellnessBreakTaskCount: s.wellnessBreakTaskCount,
+        breakActivities: s.breakActivities,
       }),
-      merge: (persisted, current) => ({
-        ...current,
-        ...(persisted as Partial<HerAIPersisted>),
-      }),
+      merge: (persisted, current) => mergePersistedState(persisted, current as HerAIStore),
     }
   )
 );

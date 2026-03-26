@@ -6,6 +6,7 @@ import {
   getSuggestions,
   getCyclePhase,
 } from '../../services/aiEngine';
+import { calendarDateKey } from '../../utils/calendarDate';
 
 const moodEmoji: Record<string, string> = {
   great: '😄',
@@ -29,7 +30,7 @@ export function DashboardPage() {
   const pending = tasks.filter((t) => !t.done).length;
   const spent = expenses.reduce((s, e) => s + e.amount, 0);
   const remaining = finance.income - spent;
-  const today = new Date().toISOString().slice(0, 10);
+  const today = calendarDateKey();
   const moodToday = moods.find((m) => m.date === today);
   const wellnessDisplay = moodToday ? moodEmoji[moodToday.mood] ?? '--' : '--';
 

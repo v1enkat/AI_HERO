@@ -11,6 +11,10 @@ const S = {
   wins: [],
   moods: [],
   sleepLog: [],
+  wellnessBreakReminders: { enabled: false, dayKey: '', validBreaksCount: 0 },
+  /** Same as React app — authoritative break completions for scoring (shared herai_data). */
+  wellnessBreakTaskCount: { dateKey: '', count: 0 },
+  breakActivities: [],
   finance: { income: 0, savingsGoal: 0 },
   cycle: { startDate: '', length: 28 },
   settings: { theme: 'light', apiKey: '', apiProvider: 'builtin', lang: 'en' },
@@ -30,7 +34,7 @@ const S = {
   },
   save() {
     const d = {};
-    ['user','tasks','events','groceries','expenses','mealPlan','familyEvents','geoReminders','skills','wins','moods','sleepLog','finance','cycle','settings','chatHistory','instructorTopic','instructorWeek'].forEach(k => d[k] = this[k]);
+    ['user','tasks','events','groceries','expenses','mealPlan','familyEvents','geoReminders','skills','wins','moods','sleepLog','wellnessBreakReminders','wellnessBreakTaskCount','breakActivities','finance','cycle','settings','chatHistory','instructorTopic','instructorWeek'].forEach(k => d[k] = this[k]);
     localStorage.setItem('herai_data', JSON.stringify(d));
   }
 };

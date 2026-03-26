@@ -691,12 +691,13 @@
         </label>
         <span>Break reminders every 45 minutes</span>
       </div>
-      <div class="break-rituals" id="breakRituals">
-        <div class="ritual">🧘 5 deep breaths</div>
-        <div class="ritual">💧 Drink water</div>
-        <div class="ritual">👀 Look at something 20ft away for 20 seconds</div>
-        <div class="ritual">🚶 Quick stretch or walk</div>
+      <label class="break-activities-label" for="breakActivityInput">Your break activities</label>
+      <p class="lead-desc break-activities-hint">Add things you want to do when a reminder fires (shown in the popup).</p>
+      <div class="break-activity-add">
+        <input type="text" id="breakActivityInput" maxlength="200" placeholder="e.g. Walk outside, call a friend…">
+        <button type="button" class="btn btn-ghost" onclick="Wellness.addBreakActivity()">Add</button>
       </div>
+      <div class="break-rituals" id="breakRituals"></div>
     </div>
 
     <!-- Sleep Tracker -->

@@ -1514,8 +1514,72 @@ select {
 .toggle input:checked + .toggle-slider { background: var(--mint); }
 .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
 
-.break-rituals { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.break-activities-label {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 0.5rem;
+}
+.break-activities-hint { margin-top: 0.25rem !important; margin-bottom: 0.6rem !important; }
+.break-activity-add {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+.break-activity-add input {
+  flex: 1;
+  min-width: 160px;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  background: var(--bg);
+  color: var(--text);
+}
+.break-activities-empty { padding: 0.75rem 0; width: 100%; }
+.break-activities-empty .empty-text { font-size: 0.85rem; }
+
+.break-rituals { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: flex-start; }
 .ritual { padding: 0.5rem 1rem; background: var(--bg); border-radius: 100px; font-size: 0.82rem; }
+.ritual-custom {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding-right: 0.35rem;
+  max-width: 100%;
+}
+.ritual-text { overflow: hidden; text-overflow: ellipsis; }
+.ritual-complete {
+  flex-shrink: 0;
+  border: none;
+  border-radius: 999px;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba(126, 206, 193, 0.28);
+  color: var(--text);
+  cursor: pointer;
+}
+.ritual-complete:hover { background: rgba(126, 206, 193, 0.45); }
+.ritual-remove {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(232, 82, 111, 0.15);
+  color: var(--text);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.ritual-remove:hover { background: rgba(232, 82, 111, 0.28); }
 
 .sleep-input label { display: block; font-size: 0.82rem; color: var(--text-light); margin-bottom: 0.3rem; margin-top: 0.6rem; }
 .sleep-input input, .sleep-input select { width: 100%; padding: 0.6rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.88rem; margin-bottom: 0.5rem; background: var(--bg); color: var(--text); }

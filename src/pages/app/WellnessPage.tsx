@@ -1,7 +1,25 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useToast } from '../../context/ToastContext';
 import { useHerAIStore } from '../../store/useHerAIStore';
+import type { HerAIStore } from '../../store/useHerAIStore';
 import { getCyclePhase } from '../../services/aiEngine';
+import { calendarDateKey } from '../../utils/calendarDate';
+
+/** Wellness points per break activity marked Done (same day). */
+const WELLNESS_POINTS_PER_BREAK_TASK = 10;
+
+/** Stable selectors — inline lambdas change identity every render and can break useSyncExternalStore subscriptions. */
+function selectTodayMood(s: HerAIStore): string {
+  const d = calendarDateKey();
+  return s.moods.find((m) => m.date === d)?.mood ?? '';
+}
+
+function selectBreaksToday(s: HerAIStore): number {
+  const d = calendarDateKey();
+  const b = s.wellnessBreakTaskCount;
+  if (!b || b.dateKey !== d) return 0;
+  return Number(b.count) || 0;
+}
 
 const moodEmoji: Record<string, string> = {
   great: '😄',
@@ -18,22 +36,37 @@ const moodColor: Record<string, string> = {
   stressed: 'rgba(232,82,111,0.2)',
 };
 
+function parseLoggedSleepHours(raw: unknown): number | null {
+  if (raw == null || raw === '') return null;
+  const n = typeof raw === 'number' ? raw : parseFloat(String(raw).trim().replace(',', '.'));
+  return Number.isFinite(n) ? n : null;
+}
+
 export function WellnessPage() {
   const { toast } = useToast();
   const moods = useHerAIStore((s) => s.moods);
+  const todayMood = useHerAIStore(selectTodayMood);
   const sleepLog = useHerAIStore((s) => s.sleepLog);
   const cycle = useHerAIStore((s) => s.cycle);
+  const wellnessBreakReminders = useHerAIStore((s) => s.wellnessBreakReminders);
+  const breakActivities = useHerAIStore((s) => s.breakActivities);
   const logMood = useHerAIStore((s) => s.logMood);
   const setCycle = useHerAIStore((s) => s.setCycle);
   const addSleep = useHerAIStore((s) => s.addSleep);
+  const setWellnessBreakRemindersEnabled = useHerAIStore((s) => s.setWellnessBreakRemindersEnabled);
+  const completeBreakActivityAt = useHerAIStore((s) => s.completeBreakActivityAt);
+  const addBreakActivity = useHerAIStore((s) => s.addBreakActivity);
+  const removeBreakActivity = useHerAIStore((s) => s.removeBreakActivity);
 
   const [startDate, setStartDate] = useState(cycle.startDate);
   const [endDate, setEndDate] = useState(cycle.endDate ?? '');
   const [length, setLength] = useState(String(cycle.length || 28));
   const [sleepH, setSleepH] = useState('');
   const [sleepQ, setSleepQ] = useState('good');
-  const [breaksOn, setBreaksOn] = useState(false);
+  const [breakActivityInput, setBreakActivityInput] = useState('');
   const breakRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const breakRemindersEnabled = wellnessBreakReminders.enabled;
 
   useEffect(() => {
     setStartDate(cycle.startDate);
@@ -42,17 +75,37 @@ export function WellnessPage() {
   }, [cycle.startDate, cycle.endDate, cycle.length]);
 
   useEffect(() => {
+    if (!breakRemindersEnabled) {
+      if (breakRef.current) {
+        clearInterval(breakRef.current);
+        breakRef.current = null;
+      }
+      return;
+    }
+    if (breakRef.current) clearInterval(breakRef.current);
+    breakRef.current = setInterval(() => {
+      const acts = useHerAIStore.getState().breakActivities;
+      const msg =
+        acts.length > 0
+          ? acts[Math.floor(Math.random() * acts.length)]!
+          : 'Time for a break. Add your own activities above for ideas next time.';
+      toast(msg, 'info');
+    }, 45 * 60 * 1000);
     return () => {
-      if (breakRef.current) clearInterval(breakRef.current);
+      if (breakRef.current) {
+        clearInterval(breakRef.current);
+        breakRef.current = null;
+      }
     };
-  }, []);
+  }, [breakRemindersEnabled, toast]);
 
-  const today = new Date().toISOString().slice(0, 10);
-  const todayMood = moods.find((m) => m.date === today)?.mood;
+  const today = calendarDateKey();
+
+  const breaksToday = useHerAIStore(selectBreaksToday);
 
   const score = useMemo(() => {
     let sc = 50;
-    if (todayMood) {
+    if (todayMood !== '') {
       const moodScores: Record<string, number> = {
         great: 90,
         good: 75,
@@ -62,29 +115,38 @@ export function WellnessPage() {
       };
       sc = moodScores[todayMood] ?? 50;
     }
-    const lastSleep = sleepLog[sleepLog.length - 1];
-    if (lastSleep) {
-      if (lastSleep.hours >= 7 && lastSleep.hours <= 9) sc += 10;
-      if (lastSleep.quality === 'great') sc += 5;
-      if (lastSleep.quality === 'poor') sc -= 10;
+    sc += WELLNESS_POINTS_PER_BREAK_TASK * breaksToday;
+    sc = Math.min(100, sc);
+
+    const todaysSleep = sleepLog.filter((e) => e.date === today);
+    const sleepEntry = todaysSleep.length ? todaysSleep[todaysSleep.length - 1] : null;
+    if (sleepEntry) {
+      const h = parseLoggedSleepHours(sleepEntry.hours);
+      if (h != null && h > 0) {
+        if (h >= 7) {
+          sc = 100;
+        } else {
+          sc -= 5 * (7 - h);
+        }
+      }
     }
-    return Math.max(0, Math.min(100, sc));
-  }, [todayMood, sleepLog]);
+
+    return Math.round(Math.max(0, Math.min(100, sc)));
+  }, [todayMood, sleepLog, today, breaksToday]);
 
   const phase = getCyclePhase();
   const dashOffset = 339.3 * (1 - score / 100);
 
   const daysSinceLastPeriodStart = useMemo(() => {
     if (!startDate) return null;
-    const start = new Date(startDate);
-    const today = new Date();
-    const diff = Math.floor((today.getTime() - start.getTime()) / 86400000);
+    const start = new Date(startDate + 'T12:00:00');
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - start.getTime()) / 86400000);
     return Math.max(0, diff);
   }, [startDate]);
 
   const cycleIntervalDays = parseInt(length, 10) || 28;
 
-  /** Advisory tied to the same “days since last period” count shown above (current cycle length so far). */
   const daysSinceAdvisory = useMemo(() => {
     if (daysSinceLastPeriodStart == null) return null;
     if (daysSinceLastPeriodStart > 35) {
@@ -93,7 +155,6 @@ export function WellnessPage() {
     return null;
   }, [daysSinceLastPeriodStart]);
 
-  /** Short-cycle note: uses typical interval from the form so we don’t warn on day 1–20 of a normal cycle. */
   const shortCycleAdvisory = useMemo(() => {
     if (cycleIntervalDays >= 21) return null;
     return 'This may be due to hormonal imbalance, stress, thyroid issues, or conditions like PCOS, leading to early ovulation and shorter cycles.';
@@ -116,33 +177,40 @@ export function WellnessPage() {
   };
 
   const onSleep = () => {
-    const h = parseFloat(sleepH);
-    if (!h) return;
-    addSleep(h, sleepQ);
+    const hours = parseLoggedSleepHours(sleepH);
+    if (hours == null || hours <= 0) {
+      toast('Enter a valid number of hours (e.g. 7 or 7.5).', 'info');
+      return;
+    }
+    addSleep(hours, sleepQ);
     setSleepH('');
     toast('😴 Sleep logged!', 'success');
   };
 
   const toggleBreaks = (on: boolean) => {
-    setBreaksOn(on);
-    if (breakRef.current) {
-      clearInterval(breakRef.current);
-      breakRef.current = null;
-    }
+    setWellnessBreakRemindersEnabled(on);
     if (on) {
-      breakRef.current = setInterval(() => {
-        const tips = [
-          'Take 5 deep breaths.',
-          'Drink a glass of water.',
-          'Look at something 20 feet away for 20 seconds.',
-          'Stand up and stretch for 30 seconds.',
-        ];
-        toast(tips[Math.floor(Math.random() * tips.length)]!, 'info');
-      }, 45 * 60 * 1000);
       toast('⏰ Break reminders enabled (every 45 min)', 'success');
     } else {
       toast('Break reminders disabled', 'info');
     }
+  };
+
+  const onAddBreakActivity = () => {
+    const t = breakActivityInput.trim();
+    if (!t) return;
+    if (breakActivities.length >= 40) {
+      toast('Maximum 40 activities', 'info');
+      return;
+    }
+    addBreakActivity(t);
+    setBreakActivityInput('');
+    toast('Break activity added', 'success');
+  };
+
+  const onCompleteBreakActivity = (index: number) => {
+    completeBreakActivityAt(index);
+    toast(`+${WELLNESS_POINTS_PER_BREAK_TASK} wellness: break task completed`, 'success');
   };
 
   return (
@@ -295,25 +363,67 @@ export function WellnessPage() {
         </div>
       </div>
 
-      <div className="well-card">
+      <div className="well-card wide">
         <h3>⏰ Smart Break Reminder</h3>
-        <p className="lead-desc">Get reminded to take breaks based on your work patterns.</p>
         <div className="break-toggle">
           <label className="toggle">
             <input
               type="checkbox"
-              checked={breaksOn}
+              checked={breakRemindersEnabled}
               onChange={(e) => toggleBreaks(e.target.checked)}
             />
             <span className="toggle-slider" />
           </label>
           <span>Break reminders every 45 minutes</span>
         </div>
+        <label className="break-activities-label" htmlFor="breakActivityInput">
+          Activities for your breaks
+        </label>
+        <p className="muted small break-activities-hint">
+          Suggestions shown in reminders are picked at random from this list.
+        </p>
+        <div className="break-activity-add">
+          <input
+            id="breakActivityInput"
+            type="text"
+            maxLength={200}
+            placeholder="e.g. Stretch, drink water, look away from screen…"
+            value={breakActivityInput}
+            onChange={(e) => setBreakActivityInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                onAddBreakActivity();
+              }
+            }}
+          />
+          <button type="button" className="btn btn-secondary" onClick={onAddBreakActivity}>
+            Add
+          </button>
+        </div>
         <div className="break-rituals" id="breakRituals">
-          <div className="ritual">🧘 5 deep breaths</div>
-          <div className="ritual">💧 Drink water</div>
-          <div className="ritual">👀 Look at something 20ft away for 20 seconds</div>
-          <div className="ritual">🚶 Quick stretch or walk</div>
+          {breakActivities.length === 0 ? (
+            <div className="empty-state break-activities-empty">
+              <div className="empty-text">No activities yet — add one above.</div>
+            </div>
+          ) : (
+            breakActivities.map((text, i) => (
+              <div key={i} className="ritual ritual-custom">
+                <span className="ritual-text">{text}</span>
+                <button type="button" className="ritual-complete" onClick={() => onCompleteBreakActivity(i)}>
+                  Done
+                </button>
+                <button
+                  type="button"
+                  className="ritual-remove"
+                  aria-label="Remove"
+                  onClick={() => removeBreakActivity(i)}
+                >
+                  ×
+                </button>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
